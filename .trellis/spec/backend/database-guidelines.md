@@ -1,51 +1,92 @@
-# Database Guidelines
+# Database and Persistence Guidelines
 
-> Database patterns and conventions for this project.
+> Naming conventions, persistence patterns, and ORM (YAML-based) usage.
 
 ---
 
 ## Overview
 
-<!--
-Document your project's database conventions here.
+This project uses a **YAML-based Registry** for persistence instead of a traditional relational database like PostgreSQL.
 
-Questions to answer:
-- What ORM/query library do you use?
-- How are migrations managed?
-- What are the naming conventions for tables/columns?
-- How do you handle transactions?
--->
-
-(To be filled by the team)
+- **Storage**: Data is stored as structured YAML files (e.g., `data/datasets.yaml`).
+- **Access**: Managed via `Registry` classes in `app/services/`.
 
 ---
 
-## Query Patterns
+## The Registry Pattern
 
-<!-- How should queries be written? Batch operations? -->
+Every main entity has a corresponding `Registry` class that follows these patterns:
 
-(To be filled by the team)
+### 1. File management (`_ensure`, `_read`, `_write`)
+
+Registries are responsible for ensuring their YAML files exist and managing file I/O.
+
+```python
+# Example from DatasetRegistry
+def _ensure(self):
+    if not os.path.exists(self.path):
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        with open(self.path, "w", encoding="utf-8") as f:
+            yaml.safe_dump({"datasets": {}}, f)
+
+def _read(self) -> Dict:
+    with open(self.path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {"datasets": {}}
+
+def _write(self, data: Dict):
+    with open(self.path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+```
+
+### 2. CRUD Operations
+
+Registries implement methods like `add_or_update`, `get`, `list`, and `remove`.
+
+- Use **unique identifiers** (e.g., `id`, `name`, or `path`) as keys in the YAML structure.
+- Always perform a full read/write for any update (since it's YAML).
+
+```python
+def get(self, ds_id: str) -> Dict | None:
+    data = self._read()
+    return data["datasets"].get(ds_id)
+
+def list(self) -> List[Dict]:
+    data = self._read()
+    return list(data["datasets"].values())
+```
+
+### 3. Dependency Injection via Container
+
+Avoid instantiating registries directly in route handlers. Use the `container` singleton.
+
+```python
+# Correct
+from app.core.container import container
+ds = container.dataset_registry.get(ds_id)
+```
 
 ---
 
-## Migrations
+## Guidelines
 
-<!-- How to create and run migrations -->
-
-(To be filled by the team)
-
----
-
-## Naming Conventions
-
-<!-- Table names, column names, index names -->
-
-(To be filled by the team)
+- [OK] **Atomic Writes**: Always overwrite the entire YAML file to ensure consistency (but be aware of concurrency).
+- [OK] **Validation**: Always use Pydantic models in the API layer before passing data to registries.
+- [X] **Avoid Large Files**: This pattern is not suitable for huge datasets. For large data, store metadata in YAML and the actual content in external files (e.g., `.parquet`, `.jsonl`).
+- [X] **No Concurrent Writes**: The current implementation does not handle concurrent file access locks. Minimize write frequency.
 
 ---
 
-## Common Mistakes
+## Examples
 
-<!-- Database-related mistakes your team has made -->
-
-(To be filled by the team)
+**Example: Adding/Updating a record**
+```python
+def add_or_update(self, item: dict) -> dict:
+    # Use path-based hashing or similar for ID generation
+    item_id = hashlib.md5(item["path"].encode()).hexdigest()
+    item["id"] = item_id
+    
+    data = self._read()
+    data["items"][item_id] = item
+    self._write(data)
+    return item
+```

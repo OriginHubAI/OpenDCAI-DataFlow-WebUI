@@ -1,51 +1,47 @@
-# Quality Guidelines
+# Backend Quality Guidelines
 
-> Code quality standards for backend development.
+> Code standards, forbidden patterns, and testing requirements.
 
 ---
 
-## Overview
+## Code Standards
 
-<!--
-Document your project's quality standards here.
+- **Language**: All code and comments MUST be in English.
+- **Type Hints**: Always use Python type hints for function arguments and return values.
+- **Pydantic**: Use Pydantic models for all API request/response validation.
+- **FastAPI**: Follow standard FastAPI patterns (routers, dependencies).
 
-Questions to answer:
-- What patterns are forbidden?
-- What linting rules do you enforce?
-- What are your testing requirements?
-- What code review standards apply?
--->
+---
 
-(To be filled by the team)
+## Testing
+
+This project uses **[Pytest](https://pytest.org/)** for testing.
+
+### Test Directory Structure
+Tests are located in `backend/tests/`.
+- `conftest.py`: Shared fixtures (e.g., app instance, mock database).
+- `test_*.py`: Test files for specific modules.
+
+### Running Tests
+From the `backend/` directory:
+
+```bash
+pytest
+```
 
 ---
 
 ## Forbidden Patterns
 
-<!-- Patterns that should never be used and why -->
-
-(To be filled by the team)
-
----
-
-## Required Patterns
-
-<!-- Patterns that must always be used -->
-
-(To be filled by the team)
+- [X] **Direct JSON manipulation**: Don't use raw `dict` for API responses; always use Pydantic and the `ApiResponse` envelope.
+- [X] **Print Statements**: Never use `print()` for logging; use `loguru`.
+- [X] **Hardcoded Paths**: Use `settings` from `app/core/config.py` for all file and directory paths.
+- [X] **In-module Instantiation**: Avoid instantiating registries at the module level; use the `container` for dependency injection.
 
 ---
 
-## Testing Requirements
+## Guidelines for New Features
 
-<!-- What level of testing is expected -->
-
-(To be filled by the team)
-
----
-
-## Code Review Checklist
-
-<!-- What reviewers should check -->
-
-(To be filled by the team)
+- [OK] Every new API endpoint should have a corresponding Pydantic schema.
+- [OK] Every business logic change should be accompanied by a unit test.
+- [OK] Documentation for new endpoints should be added via FastAPI's `summary` and `description` parameters.

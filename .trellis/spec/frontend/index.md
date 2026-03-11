@@ -6,7 +6,7 @@
 
 ## Overview
 
-This directory contains guidelines for frontend development. Fill in each file with your project's specific conventions.
+This directory contains guidelines for frontend development. All files have been filled with project-specific conventions.
 
 ---
 
@@ -14,26 +14,13 @@ This directory contains guidelines for frontend development. Fill in each file w
 
 | Guide | Description | Status |
 |-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition | To fill |
-| [Hook Guidelines](./hook-guidelines.md) | Custom hooks, data fetching patterns | To fill |
-| [State Management](./state-management.md) | Local state, global state, server state | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
+| [Directory Structure](./directory-structure.md) | Module organization and file layout | Filled |
+| [Component Guidelines](./component-guidelines.md) | Options API, v-model, slots | Filled |
+| [Hook Guidelines](./hook-guidelines.md) | Composition API, useGlobal | Filled |
+| [State Management](./state-management.md) | Pinia setup store, local state | Filled |
+| [Quality Guidelines](./quality-guidelines.md) | Linting, formatting, API sync | Filled |
+| [Type Safety](./type-safety.md) | JSDoc, global types for IDE support | Filled |
 
 ---
 
-## How to Fill These Guidelines
-
-For each guideline file:
-
-1. Document your project's **actual conventions** (not ideals)
-2. Include **code examples** from your codebase
-3. List **forbidden patterns** and why
-4. Add **common mistakes** your team has made
-
-The goal is to help AI assistants and new team members understand how YOUR project works.
-
----
-
-**Language**: All documentation should be written in **English**.
+**Language**: All documentation is written in **English**.

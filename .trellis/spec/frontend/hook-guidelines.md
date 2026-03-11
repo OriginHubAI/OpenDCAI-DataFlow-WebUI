@@ -1,51 +1,84 @@
 # Hook Guidelines
 
-> How hooks are used in this project.
+> Custom hooks naming, patterns, and data fetching.
 
 ---
 
-## Overview
+## Hook Pattern: Vue 3 Composition API
 
-<!--
-Document your project's hook conventions here.
+This project uses **custom hooks** (composables) to encapsulate complex logic.
 
-Questions to answer:
-- What custom hooks do you have?
-- How do you handle data fetching?
-- What are the naming conventions?
-- How do you share stateful logic?
--->
+### Basic Structure
 
-(To be filled by the team)
+```javascript
+import { ref, onMounted } from 'vue'
+import { useGlobal } from '@/hooks/general/useGlobal'
 
----
+export function useMyHook() {
+  const { $api } = useGlobal()
+  const data = ref(null)
 
-## Custom Hook Patterns
+  const fetchData = async () => {
+    const res = await $api.someDomain.list_items()
+    data.value = res.data
+  }
 
-<!-- How to create and structure custom hooks -->
+  onMounted(fetchData)
 
-(To be filled by the team)
-
----
-
-## Data Fetching
-
-<!-- How data fetching is handled (React Query, SWR, etc.) -->
-
-(To be filled by the team)
+  return { data, fetchData }
+}
+```
 
 ---
 
-## Naming Conventions
+## Core Hooks
 
-<!-- Hook naming rules (use*, etc.) -->
+### 1. `useGlobal` (`@/hooks/general/useGlobal`)
+The essential hook to access global properties (which are injected into the Vue instance) inside the `setup()` function.
 
-(To be filled by the team)
+**Available properties via `useGlobal()`:**
+- `$api`: The auto-generated API client.
+- `$axios`: The raw axios instance.
+- `$router`: Vue Router.
+- `$barWarning`: Global alert/notification.
+- `$infoBox`: Global confirmation box.
+- `$Guid`: Guid generator.
+
+### 2. `usePipelineOperation` (`@/hooks/dataflow/usePipelineOperation`)
+Handles complex logic for rendering and manipulating the Vue Flow diagram.
 
 ---
 
-## Common Mistakes
+## Guidelines for Hooks
 
-<!-- Hook-related mistakes your team has made -->
+- [OK] **Naming Convention**: Always start with `use` (e.g., `useEdgeSync.js`).
+- [OK] **Use `useGlobal()`**: Instead of passing `this` or a `proxy` object as an argument, use `useGlobal()` to get access to common utilities.
+- [OK] **Separate Domain Logic**: Keep related operations in separate folders within `src/hooks/` (e.g., `dataflow/`).
+- [OK] **Return an Object**: Always return an object with the reactive refs and methods you want to expose.
 
-(To be filled by the team)
+---
+
+## Example: Data Fetching Hook
+
+```javascript
+import { ref } from 'vue'
+import { useGlobal } from '@/hooks/general/useGlobal'
+
+export function useDatasets() {
+  const { $api } = useGlobal()
+  const datasets = ref([])
+  const loading = ref(false)
+
+  const getDatasetsList = async () => {
+    loading.value = true
+    try {
+      const res = await $api.datasets.list_datasets()
+      datasets.value = res.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { datasets, loading, getDatasetsList }
+}
+```

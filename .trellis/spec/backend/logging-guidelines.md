@@ -1,51 +1,60 @@
 # Logging Guidelines
 
-> How logging is done in this project.
+> Structured logging, log levels, and what to log.
 
 ---
 
-## Overview
+## Logging Framework
 
-<!--
-Document your project's logging conventions here.
+This project uses **[Loguru](https://github.com/Delgan/loguru)** for all logging.
 
-Questions to answer:
-- What logging library do you use?
-- What are the log levels and when to use each?
-- What should be logged?
-- What should NOT be logged (PII, secrets)?
--->
-
-(To be filled by the team)
+- **Import**: `from loguru import logger`
+- **Configuration**: Managed in `app/core/logger_setup.py`.
 
 ---
 
 ## Log Levels
 
-<!-- When to use each level: debug, info, warn, error -->
+Follow these conventions for log levels:
 
-(To be filled by the team)
-
----
-
-## Structured Logging
-
-<!-- Log format, required fields -->
-
-(To be filled by the team)
-
----
-
-## What to Log
-
-<!-- Important events to log -->
-
-(To be filled by the team)
+| Level | When to use | Example |
+|-------|-------------|---------|
+| `DEBUG` | Detailed info, usually for troubleshooting | `logger.debug(f"Input payload: {payload}")` |
+| `INFO` | High-level operations (server start, task creation) | `logger.info(f"Registered {cnt} datasets.")` |
+| `SUCCESS` | Successful completion of major operations | `logger.success(f"Pipeline {id} finished.")` |
+| `WARNING` | Something unusual but not a failure | `logger.warning(f"Skipping missing file: {path}")` |
+| `ERROR` | Operation failed, but application continues | `logger.error(f"Failed to register dataset: {e}")` |
+| `CRITICAL` | Major failure that might crash the app | `logger.critical("Database connection lost!")` |
 
 ---
 
-## What NOT to Log
+## Logging Practices
 
-<!-- Sensitive data, PII, secrets -->
+### 1. F-Strings for Messages
+Loguru handles f-strings naturally. Use them for clear, human-readable messages.
 
-(To be filled by the team)
+```python
+logger.info(f"Scanning directory: {dataset_dir}")
+```
+
+### 2. Logging Exceptions
+Use `logger.exception()` in `except` blocks to capture the full stack trace.
+
+```python
+try:
+    ds = registry.add_or_update(payload)
+except Exception as e:
+    logger.exception(f"Failed to register dataset: {e}")
+```
+
+### 3. Context and Tags
+While not heavily used yet, Loguru supports `bind` for adding context (like `task_id`).
+
+---
+
+## Guidelines
+
+- [OK] **Don't use `print()`**. Use `logger.info()` or `logger.debug()` instead.
+- [OK] **Log meaningful context**. Instead of `logger.error("Failed")`, use `logger.error(f"Failed to update dataset {id}: {e}")`.
+- [OK] **Use `logger.exception`** only when you need the full stack trace.
+- [X] **Avoid excessive logging** in hot paths (loops that run thousands of times) to prevent log bloat.

@@ -1,59 +1,98 @@
 # Component Guidelines
 
-> How components are built in this project.
+> Component patterns, props, composition, and styling.
 
 ---
 
-## Overview
+## Component Pattern: Vue 3 Options API
 
-<!--
-Document your project's component conventions here.
+Most components in this project use the **Options API**.
 
-Questions to answer:
-- What component patterns do you use?
-- How are props defined?
-- How do you handle composition?
-- What accessibility standards apply?
--->
+### Basic Structure
 
-(To be filled by the team)
+```vue
+<template>
+  <div class="my-component">
+    <slot name="header"></slot>
+    <div @click="handleClick">{{ title }}</div>
+  </div>
+</template>
 
----
+<script>
+export default {
+  props: {
+    title: { type: String, default: 'Default Title' },
+    modelValue: { default: false }
+  },
+  data() {
+    return {
+      internalValue: this.modelValue
+    }
+  },
+  watch: {
+    modelValue(val) { this.internalValue = val },
+    internalValue(val) { this.$emit('update:modelValue', val) }
+  },
+  methods: {
+    handleClick() {
+      this.$emit('confirm')
+    }
+  }
+}
+</script>
 
-## Component Structure
-
-<!-- Standard structure of a component file -->
-
-(To be filled by the team)
-
----
-
-## Props Conventions
-
-<!-- How props should be defined and typed -->
-
-(To be filled by the team)
-
----
-
-## Styling Patterns
-
-<!-- How styles are applied (CSS modules, styled-components, Tailwind, etc.) -->
-
-(To be filled by the team)
-
----
-
-## Accessibility
-
-<!-- A11y requirements and patterns -->
-
-(To be filled by the team)
+<style lang="scss" scoped>
+.my-component {
+  /* styles */
+}
+</style>
+```
 
 ---
 
-## Common Mistakes
+## Props and V-Model
 
-<!-- Component-related mistakes your team has made -->
+- **`modelValue`**: Follow Vue 3 convention for `v-model`. Sync it with a local state property using `watch` if you need to mutate it internally.
+- **Validation**: While optional, providing `type` and `default` for props is highly recommended.
 
-(To be filled by the team)
+---
+
+## Slots and Composition
+
+- **Named Slots**: Use `<slot name="content">` for flexible layout components.
+- **Scoped Slots**: Useful for providing component methods to the parent.
+  ```vue
+  <!-- Child -->
+  <slot name="footer" :close="closeMethod"></slot>
+  ```
+
+---
+
+## UI Library: Fluent Design (`fv-`)
+
+This project uses `@creatorsn/vfluent3`. Most common UI elements should use their `fv-` prefixed counterparts.
+
+- **Panels**: `fv-panel`
+- **Buttons**: `fv-button`
+- **Inputs**: `fv-text-box`, `fv-check-box`
+- **Lists**: `fv-list-view`
+
+---
+
+## Styling Guidelines
+
+- **Pre-processor**: Use SCSS.
+- **Global Styles**: Defined in `src/style/global.scss`.
+- **Utility Classes**: Use project-specific utility classes when available:
+  - `.bp-row`: Horizontal layout container.
+  - `.bp-row.sep`: Space-between horizontal layout.
+  - `.bp-control`: Right-aligned footer control area.
+
+---
+
+## Guidelines
+
+- [OK] **Prefer Options API** for consistency with the existing codebase (views and general components).
+- [OK] **Namespace your styles**: Use a root class name that matches the component name (e.g., `.base-panel-container`).
+- [OK] **Use `this.$barWarning`** for user-facing notifications.
+- [X] **Don't hardcode colors**: Use variables if available or follow the light/dark theme patterns seen in `basePanel.vue`.

@@ -1,51 +1,91 @@
-# State Management
+# State Management Guidelines
 
-> How state is managed in this project.
-
----
-
-## Overview
-
-<!--
-Document your project's state management conventions here.
-
-Questions to answer:
-- What state management solution do you use?
-- How is local vs global state decided?
-- How do you handle server state?
-- What are the patterns for derived state?
--->
-
-(To be filled by the team)
+> Local state, global state (Pinia), and server state.
 
 ---
 
-## State Categories
+## Global State: Pinia
 
-<!-- Local state, global state, server state, URL state -->
+This project uses **[Pinia](https://pinia.vuejs.org/)** for global state management.
 
-(To be filled by the team)
+### Store Pattern: Setup Store
+
+Stores should be defined using the **Setup Store** (function) syntax.
+
+```javascript
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+import { useGlobal } from '@/hooks/general/useGlobal'
+
+export const useMyStore = defineStore('myStore', () => {
+  // Use useGlobal hook to access $api
+  const { $api } = useGlobal()
+  
+  // State
+  const items = ref([])
+  const loading = ref(false)
+
+  // Getters
+  const itemCount = computed(() => items.value.length)
+
+  // Actions
+  async function fetchItems() {
+    loading.value = true
+    try {
+      const res = await $api.domain.list()
+      items.value = res.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { items, loading, itemCount, fetchItems }
+})
+```
 
 ---
 
-## When to Use Global State
+## Local State
 
-<!-- Criteria for promoting state to global -->
+For component-specific state, use `data()` in Options API components.
 
-(To be filled by the team)
-
----
-
-## Server State
-
-<!-- How server data is cached and synchronized -->
-
-(To be filled by the team)
+- **Sync with Props**: If a component needs to mutate a value passed via `v-model`, use a local `ref` or `data` property and `watch` the prop.
 
 ---
 
-## Common Mistakes
+## Usage in Components
 
-<!-- State management mistakes your team has made -->
+### Options API (Preferred)
+Use `mapState` and `mapActions` from `pinia`.
 
-(To be filled by the team)
+```javascript
+import { mapState, mapActions } from 'pinia'
+import { useDataflow } from '@/stores/dataflow'
+
+export default {
+  computed: {
+    ...mapState(useDataflow, ['datasets', 'currentPipeline'])
+  },
+  methods: {
+    ...mapActions(useDataflow, ['getDatasets', 'getPipelines'])
+  }
+}
+```
+
+### Composition API
+Call the store function directly.
+
+```javascript
+import { useDataflow } from '@/stores/dataflow'
+const dataflowStore = useDataflow()
+console.log(dataflowStore.datasets)
+```
+
+---
+
+## Guidelines
+
+- [OK] **Keep stores focused**: Create separate stores for different functional domains (e.g., `theme.js`, `dataflow.js`).
+- [OK] **Handle loading states**: Always wrap async actions in `try/finally` to ensure loading indicators are reset.
+- [OK] **Centralize API calls**: Prefer putting data-fetching logic in Pinia stores if the data is shared across multiple components.
+- [X] **Don't over-use global state**: If a piece of state is only used by one component and its children, use local state or props.

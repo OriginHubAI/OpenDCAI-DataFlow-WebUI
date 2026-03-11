@@ -1,51 +1,51 @@
-# Type Safety
+# Type Safety Guidelines
 
-> Type safety patterns in this project.
+> Type patterns, validation, and IDE support for JavaScript.
 
 ---
 
 ## Overview
 
-<!--
-Document your project's type safety conventions here.
+This project is a **JavaScript-first** project, but it uses **`jsconfig.json`** and **`.d.ts`** files to provide better IDE support and basic type checking.
 
-Questions to answer:
-- What type system do you use?
-- How are types organized?
-- What validation library do you use?
-- How do you handle type inference?
--->
-
-(To be filled by the team)
+- **Language**: JavaScript (`.js`, `.vue`).
+- **Type Checking**: VS Code / Volar use TypeScript-under-the-hood via `jsconfig.json`.
 
 ---
 
-## Type Organization
+## Global Types
 
-<!-- Where types are defined, shared types vs local types -->
+The project defines global types in `global.d.ts` to help the IDE understand the custom properties injected into the Vue instance.
 
-(To be filled by the team)
-
----
-
-## Validation
-
-<!-- Runtime validation patterns (Zod, Yup, io-ts, etc.) -->
-
-(To be filled by the team)
+- **`$api`**: Typed using `apiType` from `@/axios/api`.
 
 ---
 
-## Common Patterns
+## API Types
 
-<!-- Type utilities, generics, type guards -->
+API types are auto-generated and stored in `src/axios/model.js`.
 
-(To be filled by the team)
+- Use these models for documenting your data structures.
+- For complex logic, you can use JSDoc comments to help the IDE.
+
+```javascript
+/**
+ * @typedef {import('@/axios/model').DatasetOut} DatasetOut
+ */
+
+/**
+ * @param {DatasetOut} ds
+ */
+function processDataset(ds) {
+  // IDE will now provide auto-complete for ds.id, ds.name, etc.
+}
+```
 
 ---
 
-## Forbidden Patterns
+## Guidelines
 
-<!-- any, type assertions, etc. -->
-
-(To be filled by the team)
+- [OK] **Maintain `jsconfig.json`**: Ensure all path aliases and library types are registered.
+- [OK] **Use JSDoc for complex logic**: Help yourself and others by documenting input/output types of complex functions.
+- [OK] **Follow Pydantic models**: Ensure your frontend data structures match the backend's Pydantic schemas.
+- [X] **Avoid `any` style code**: Even in JS, try to maintain a consistent data structure.
