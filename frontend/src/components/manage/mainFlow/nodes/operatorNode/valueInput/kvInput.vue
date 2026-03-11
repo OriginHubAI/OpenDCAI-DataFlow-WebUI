@@ -1,21 +1,59 @@
 <template>
     <div class="kv-input">
-        <fv-button v-show="modelValue.length === 0" theme="dark" :background="gradient" :border-radius="8"
-            style="width: 100%;" @click="addItem(-1)">{{ local('Add Key-Value') }}</fv-button>
-        <div class="kv-input-item" v-for="(item, index) in modelValue" :key="index">
-            <fv-button v-show="!readonly" theme="dark" font-size="8" border-radius="50"
-                background="rgba(200, 38, 45, 1)" style="width: 18px; height: 18px; flex-shrink: 0;"
-                @click="removeItem(index)">
+        <fv-button
+            v-show="thisValue.length === 0"
+            theme="dark"
+            :background="gradient"
+            :border-radius="8"
+            style="width: 100%"
+            @click="addItem(-1)"
+            >{{ local('Add Key-Value') }}</fv-button
+        >
+        <div class="kv-input-item" v-for="(item, index) in thisValue" :key="index">
+            <fv-button
+                v-show="!readonly"
+                theme="dark"
+                font-size="8"
+                border-radius="50"
+                background="rgba(200, 38, 45, 1)"
+                style="width: 18px; height: 18px; flex-shrink: 0"
+                @click="removeItem(index)"
+            >
                 <i class="ms-Icon ms-Icon--Remove"></i>
             </fv-button>
-            <fv-text-box :theme="theme" v-model="item.name" placeholder="Key" :disabled="readonly" font-size="8"
-                border-radius="3" border-width="2" :reveal-border="true" :focus-border-color="color" underline
-                style="width: 150px; height: 30px;"></fv-text-box>
-            <fv-text-field :theme="theme" v-model="item.value" placeholder="Value" font-size="8" border-radius="3"
-                border-width="2" :reveal-border="true" :focus-border-color="color" underline></fv-text-field>
-            <fv-button v-show="!readonly" theme="dark" font-size="12" border-radius="50"
-                background="rgba(0, 204, 153, 1)" style="width: 18px; height: 18px; flex-shrink: 0;"
-                @click="addItem(index)">
+            <fv-text-box
+                :theme="theme"
+                v-model="item.name"
+                placeholder="Key"
+                :disabled="readonly"
+                font-size="8"
+                border-radius="3"
+                border-width="2"
+                :reveal-border="true"
+                :focus-border-color="color"
+                underline
+                style="width: 150px; height: 30px"
+            ></fv-text-box>
+            <fv-text-field
+                :theme="theme"
+                v-model="item.value"
+                placeholder="Value"
+                font-size="8"
+                border-radius="3"
+                border-width="2"
+                :reveal-border="true"
+                :focus-border-color="color"
+                underline
+            ></fv-text-field>
+            <fv-button
+                v-show="!readonly"
+                theme="dark"
+                font-size="12"
+                border-radius="50"
+                background="rgba(0, 204, 153, 1)"
+                style="width: 18px; height: 18px; flex-shrink: 0"
+                @click="addItem(index)"
+            >
                 <i class="ms-Icon ms-Icon--Add"></i>
             </fv-button>
         </div>
@@ -23,9 +61,9 @@
 </template>
 
 <script>
-import { mapState } from 'pinia';
-import { useAppConfig } from '@/stores/appConfig';
-import { useTheme } from '@/stores/theme';
+import { mapState } from 'pinia'
+import { useAppConfig } from '@/stores/appConfig'
+import { useTheme } from '@/stores/theme'
 
 export default {
     props: {
@@ -38,11 +76,26 @@ export default {
     },
     data() {
         return {
-
+            thisValue: []
         }
     },
     watch: {
-
+        modelValue: {
+            handler(val) {
+                // simple diff to avoid infinite loops if possible
+                if (JSON.stringify(val) !== JSON.stringify(this.thisValue)) {
+                    this.thisValue = JSON.parse(JSON.stringify(val || []))
+                }
+            },
+            immediate: true,
+            deep: true
+        },
+        thisValue: {
+            handler(val) {
+                this.$emit('update:modelValue', val)
+            },
+            deep: true
+        }
     },
     computed: {
         ...mapState(useAppConfig, ['local']),
@@ -50,14 +103,18 @@ export default {
     },
     methods: {
         addItem(index) {
-            if (!Array.isArray(this.modelValue)) {
-                this.$emit('update:modelValue', [{ key: '', value: '', kind: 'POSITIONAL_OR_KEYWORD' }])
+            if (!Array.isArray(this.thisValue)) {
+                this.thisValue = [{ key: '', value: '', kind: 'POSITIONAL_OR_KEYWORD' }]
                 return
             }
-            this.modelValue.splice(index + 1, 0, { key: '', value: '', kind: 'POSITIONAL_OR_KEYWORD' })
+            this.thisValue.splice(index + 1, 0, {
+                key: '',
+                value: '',
+                kind: 'POSITIONAL_OR_KEYWORD'
+            })
         },
         removeItem(index) {
-            this.modelValue.splice(index, 1)
+            this.thisValue.splice(index, 1)
         }
     }
 }

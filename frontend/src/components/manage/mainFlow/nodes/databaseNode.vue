@@ -32,31 +32,32 @@
                 <p class="info-value tiny" :title="thisData.hash">{{ thisData.hash }}</p>
             </div>
             <hr style="margin: 10px 8px" />
-            <div
-                v-if="thisData.operatorParams"
-                v-for="(item, index) in thisData.operatorParams.run"
-                :key="`run_${index}`"
-                class="node-row-item col"
-            >
-                <Handle
-                    :id="`${item.name}::source::run_key`"
-                    type="source"
-                    class="handle-item"
-                    :position="Position.Right"
-                    style="margin-right: -15px"
-                />
-                <fv-text-box
-                    v-model="item.value"
-                    :placeholder="appConfig.local('Please input') + ` ${item.name}`"
-                    font-size="12"
-                    border-radius="8"
-                    :reveal-border="true"
-                    readonly
-                    @mousedown.stop
-                    @click.stop
-                    style="width: 100%; height: 35px; margin-top: 5px"
-                ></fv-text-box>
-            </div>
+            <template v-if="thisData.operatorParams">
+                <div
+                    v-for="(item, index) in thisData.operatorParams.run"
+                    :key="`run_${index}`"
+                    class="node-row-item col"
+                >
+                    <Handle
+                        :id="`${item.name}::source::run_key`"
+                        type="source"
+                        class="handle-item"
+                        :position="Position.Right"
+                        style="margin-right: -15px"
+                    />
+                    <fv-text-box
+                        v-model="item.value"
+                        :placeholder="appConfig.local('Please input') + ` ${item.name}`"
+                        font-size="12"
+                        border-radius="8"
+                        :reveal-border="true"
+                        readonly
+                        @mousedown.stop
+                        @click.stop
+                        style="width: 100%; height: 35px; margin-top: 5px"
+                    ></fv-text-box>
+                </div>
+            </template>
             <div class="node-row-item">
                 <fv-button
                     theme="dark"
@@ -169,7 +170,7 @@ const getNodeDetail = async () => {
 
 watch(
     () => props.data.id,
-    (newVal, oldVal) => {
+    () => {
         getNodeDetail()
     }
 )

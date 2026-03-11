@@ -5,20 +5,40 @@
                 <p class="main-title">{{ local('Settings') }}</p>
             </div>
             <div class="content-block">
-                <fv-Collapse :theme="theme" class="serving-item" :icon="theme === 'light' ? 'Light' : 'QuietHours'"
-                    :title="local('Switch Theme')" :content="local('Change the theme of the DataFlow WebUI.')"
-                    :disabled-collapse="true" :max-height="'auto'">
+                <fv-Collapse
+                    :theme="theme"
+                    class="serving-item"
+                    :icon="theme === 'light' ? 'Light' : 'QuietHours'"
+                    :title="local('Switch Theme')"
+                    :content="local('Change the theme of the DataFlow WebUI.')"
+                    :disabled-collapse="true"
+                    :max-height="'auto'"
+                >
                     <template #extension>
-                        <fv-toggle-switch :theme="theme" v-model="themeModel" :on="local('Dark')"
-                            :off="local('Light')"></fv-toggle-switch>
+                        <fv-toggle-switch
+                            :theme="theme"
+                            v-model="themeModel"
+                            :on="local('Dark')"
+                            :off="local('Light')"
+                        ></fv-toggle-switch>
                     </template>
                 </fv-Collapse>
-                <fv-Collapse :theme="theme" class="serving-item" icon="LocaleLanguage" :title="local('Language')"
-                    :content="local('Change the language of the DataFlow WebUI.')" :disabled-collapse="true"
-                    :max-height="'auto'">
+                <fv-Collapse
+                    :theme="theme"
+                    class="serving-item"
+                    icon="LocaleLanguage"
+                    :title="local('Language')"
+                    :content="local('Change the language of the DataFlow WebUI.')"
+                    :disabled-collapse="true"
+                    :max-height="'auto'"
+                >
                     <template #extension>
-                        <fv-combobox :theme="theme" v-model="languageModel" :options="languageList"
-                            style="width: 120px;"></fv-combobox>
+                        <fv-combobox
+                            :theme="theme"
+                            v-model="languageModel"
+                            :options="languageList"
+                            style="width: 120px"
+                        ></fv-combobox>
                     </template>
                 </fv-Collapse>
             </div>
@@ -32,6 +52,7 @@ import { useAppConfig } from '@/stores/appConfig'
 import { useTheme } from '@/stores/theme'
 
 export default {
+    name: 'SettingsIndex',
     data() {
         return {
             languageList: [
@@ -71,19 +92,20 @@ export default {
         },
         languageModel: {
             get() {
-                if (this.language == undefined) return {
-                    key: 'en',
-                    text: 'English'
-                }
-                return this.languageList.find(item => item.key === this.language)
+                if (this.language == undefined)
+                    return {
+                        key: 'en',
+                        text: 'English'
+                    }
+                return this.languageList.find((item) => item.key === this.language)
             },
             set(val) {
-                let language = this.languageList.find(item => item.key === val.key)
+                let language = this.languageList.find((item) => item.key === val.key)
                 if (language) {
                     this.reviseLanguage(language.key)
                 }
             }
-        },
+        }
     },
     mounted() {
         this.getConfig()
@@ -92,7 +114,7 @@ export default {
         ...mapActions(useAppConfig, ['reviseLanguage']),
         ...mapActions(useTheme, ['reviseTheme']),
         getConfig() {
-            this.$api.preferences.get_preferences_api_v1_preferences__get().then(res => {
+            this.$api.preferences.get_preferences_api_v1_preferences__get().then((res) => {
                 if (res.code === 200) {
                     if (res.data.language) {
                         this.reviseLanguage(res.data.language)
@@ -106,16 +128,19 @@ export default {
         reviseConfig() {
             if (!this.lock.update) return
             this.lock.update = false
-            this.$api.preferences.set_preferences_api_v1_preferences__post({
-                language: this.language,
-                theme: this.theme
-            }).then(res => {
-                if (res.code === 200) {
+            this.$api.preferences
+                .set_preferences_api_v1_preferences__post({
+                    language: this.language,
+                    theme: this.theme
+                })
+                .then((res) => {
+                    if (res.code === 200) {
+                        this.lock.update = true
+                    }
+                })
+                .finally(() => {
                     this.lock.update = true
-                }
-            }).finally(() => {
-                this.lock.update = true
-            })
+                })
         }
     }
 }

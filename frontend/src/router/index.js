@@ -1,7 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import tool from './tools'
-
 import Manage from './Manage'
 
 import home from '@/views/client/home/index.vue'

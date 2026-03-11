@@ -1,114 +1,247 @@
 <template>
-    <div class="df-default-container" :class="[{ dark: theme === 'dark', 'show-pipeline': show.pipeline }]">
-        <pipeline v-model="show.pipeline" v-model:loading="lock.loading" v-model:pipeline="currentPipeline"
-            :flow-id="flowId" class="df-pipeline-container" @confirm-dataset="confirmDataset($event, true)"
-            @select-pipeline="selectPipelineCallback"></pipeline>
+    <div
+        class="df-default-container"
+        :class="[{ dark: theme === 'dark', 'show-pipeline': show.pipeline }]"
+    >
+        <pipeline
+            v-model="show.pipeline"
+            v-model:loading="lock.loading"
+            v-model:pipeline="currentPipeline"
+            :flow-id="flowId"
+            class="df-pipeline-container"
+            @confirm-dataset="confirmDataset($event, true)"
+            @select-pipeline="selectPipelineCallback"
+        ></pipeline>
         <div class="df-flow-container">
-            <mainFlow :id="flowId" v-model:nodes="nodes" v-model:edges="edges" @switch-database="show.dataset = true"
-                @connect="onConnect" @connect-start="onConnectStart" @connect-end="onConnectEnd"
-                @update-run-value="useEdgeSync.syncRunValue($event, flowId)" @show-details="showExecDetails"
-                @download-data="downloadData" @click="show.pipeline = false"></mainFlow>
+            <mainFlow
+                :id="flowId"
+                v-model:nodes="nodes"
+                v-model:edges="edges"
+                @switch-database="show.dataset = true"
+                @connect="onConnect"
+                @connect-start="onConnectStart"
+                @connect-end="onConnectEnd"
+                @update-run-value="useEdgeSync.syncRunValue($event, flowId)"
+                @show-details="showExecDetails"
+                @download-data="downloadData"
+                @click="show.pipeline = false"
+            ></mainFlow>
             <div class="control-menu-block">
-                <fv-command-bar :theme="theme" v-model="value" :options="options" :item-border-radius="30"
-                    :background="theme === 'dark' ? '' : 'rgba(250, 250, 250, 0.8)'" class="command-bar">
+                <fv-command-bar
+                    :theme="theme"
+                    v-model="value"
+                    :options="options"
+                    :item-border-radius="30"
+                    :background="theme === 'dark' ? '' : 'rgba(250, 250, 250, 0.8)'"
+                    class="command-bar"
+                >
                     <template v-slot:optionItem="x">
                         <div class="command-bar-item-wrapper">
                             <fv-img v-if="x.item.img" class="option-img" :src="x.item.img" alt="" />
-                            <i v-else class="ms-Icon icon" :class="[`ms-Icon--${x.valueTrigger(x.item.icon)}`]"
-                                :style="{ color: x.valueTrigger(x.item.foreground) }"></i>
-                            <p class="option-name" :style="{ color: x.valueTrigger(x.item.foreground) }">
+                            <i
+                                v-else
+                                class="ms-Icon icon"
+                                :class="[`ms-Icon--${x.valueTrigger(x.item.icon)}`]"
+                                :style="{ color: x.valueTrigger(x.item.foreground) }"
+                            ></i>
+                            <p
+                                class="option-name"
+                                :style="{ color: x.valueTrigger(x.item.foreground) }"
+                            >
                                 {{ x.valueTrigger(x.item.name) }}
                             </p>
-                            <i v-show="x.item.secondary.length > 0" class="ms-Icon ms-Icon--ChevronDown icon"></i>
+                            <i
+                                v-show="x.item.secondary.length > 0"
+                                class="ms-Icon ms-Icon--ChevronDown icon"
+                            ></i>
                         </div>
                     </template>
                     <template v-slot:right-space>
                         <div class="command-bar-right-space">
-                            <fv-toggle-switch :theme="theme" v-model="isAutoConnectionModel" :width="75"
-                                :on="local('Auto')" :off="local('Manual')" :insideContent="true" :height="30"
+                            <fv-toggle-switch
+                                :theme="theme"
+                                v-model="isAutoConnectionModel"
+                                :width="75"
+                                :on="local('Auto')"
+                                :off="local('Manual')"
+                                :insideContent="true"
+                                :height="30"
                                 :off-foreground="theme === 'dark' ? 'rgba(255, 255, 255, 1)' : ''"
-                                borderColor="rgba(235, 235, 235, 1)" ring-background="rgba(180, 180, 180, 1)"
-                                :switch-on-background="gradient" :title="local('Whether Auto Connect Run Edges')">
+                                borderColor="rgba(235, 235, 235, 1)"
+                                ring-background="rgba(180, 180, 180, 1)"
+                                :switch-on-background="gradient"
+                                :title="local('Whether Auto Connect Run Edges')"
+                            >
                             </fv-toggle-switch>
-                            <fv-button :theme="currentServing ? 'dark' : theme" :background="currentServing
-                                ? 'linear-gradient(135deg, rgba(69, 98, 213, 1), #ff0080, #ff8c00)'
-                                : ''
-                                " border-radius="30" :disabled="!lock.serving" style="width: 30px; height: 30px"
-                                @click="showServing">
+                            <fv-button
+                                :theme="currentServing ? 'dark' : theme"
+                                :background="
+                                    currentServing
+                                        ? 'linear-gradient(135deg, rgba(69, 98, 213, 1), #ff0080, #ff8c00)'
+                                        : ''
+                                "
+                                border-radius="30"
+                                :disabled="!lock.serving"
+                                style="width: 30px; height: 30px"
+                                @click="showServing"
+                            >
                                 <transition-group tag="span" name="df-scale-up-to-up">
-                                    <i v-show="currentServing" key="0" class="ms-Icon"
-                                        :class="[`ms-Icon--DialShape4`]"></i>
-                                    <i v-show="!currentServing" key="1" class="ms-Icon" :class="[`ms-Icon--More`]"></i>
+                                    <i
+                                        v-show="currentServing"
+                                        key="0"
+                                        class="ms-Icon"
+                                        :class="[`ms-Icon--DialShape4`]"
+                                    ></i>
+                                    <i
+                                        v-show="!currentServing"
+                                        key="1"
+                                        class="ms-Icon"
+                                        :class="[`ms-Icon--More`]"
+                                    ></i>
                                 </transition-group>
-                                <i v-show="false" class="ms-Icon"
-                                    :class="[`ms-Icon--${currentServing ? 'DialShape4' : 'More'}`]"></i>
+                                <i
+                                    v-show="false"
+                                    class="ms-Icon"
+                                    :class="[`ms-Icon--${currentServing ? 'DialShape4' : 'More'}`]"
+                                ></i>
                             </fv-button>
-                            <fv-button theme="dark"
+                            <fv-button
+                                theme="dark"
                                 background="linear-gradient(90deg, rgba(69, 98, 213, 1), rgba(161, 145, 206, 1))"
-                                foreground="rgba(255, 255, 255, 1)" border-color="rgba(255, 255, 255, 0.3)"
-                                border-radius="30" :disabled="!currentPipeline" :reveal-background-color="[
+                                foreground="rgba(255, 255, 255, 1)"
+                                border-color="rgba(255, 255, 255, 0.3)"
+                                border-radius="30"
+                                :disabled="!currentPipeline"
+                                :reveal-background-color="[
                                     'rgba(255, 255, 255, 0.5)',
                                     'rgba(103, 105, 251, 0.6)'
-                                ]" style="width: 120px;" @click="handleRunClick">
-                                <i v-show="lock.running" class="ms-Icon ms-Icon--Play" style="margin-right: 5px"></i>
-                                <fv-progress-ring v-show="!lock.running" loading="true" :r="10" :border-width="2"
-                                    background="rgba(200, 200, 200, 1)" :color="'white'"
-                                    style="margin-right: 5px"></fv-progress-ring>
+                                ]"
+                                style="width: 120px"
+                                @click="handleRunClick"
+                            >
+                                <i
+                                    v-show="lock.running"
+                                    class="ms-Icon ms-Icon--Play"
+                                    style="margin-right: 5px"
+                                ></i>
+                                <fv-progress-ring
+                                    v-show="!lock.running"
+                                    loading="true"
+                                    :r="10"
+                                    :border-width="2"
+                                    background="rgba(200, 200, 200, 1)"
+                                    :color="'white'"
+                                    style="margin-right: 5px"
+                                ></fv-progress-ring>
                                 <p>{{ this.local('Save & Run') }}</p>
                             </fv-button>
-                            <fv-button v-show="!lock.running && executionInfo.task_id" theme="dark"
-                                background="rgba(200, 38, 95, 0.9)" font-size="10" foreground="rgba(255, 255, 255, 1)"
-                                border-color="whitesmoke" border-radius="30" :title="local('Stop')"
-                                style="width: 30px; height: 30px" @click="stopExecution">
+                            <fv-button
+                                v-show="!lock.running && executionInfo.task_id"
+                                theme="dark"
+                                background="rgba(200, 38, 95, 0.9)"
+                                font-size="10"
+                                foreground="rgba(255, 255, 255, 1)"
+                                border-color="whitesmoke"
+                                border-radius="30"
+                                :title="local('Stop')"
+                                style="width: 30px; height: 30px"
+                                @click="stopExecution"
+                            >
                                 <i class="ms-Icon ms-Icon--StopSolid"></i>
                             </fv-button>
-                            <fv-button theme="dark" background="rgba(191, 95, 95, 0.6)"
-                                foreground="rgba(255, 255, 255, 1)" border-color="whitesmoke" border-radius="30"
-                                :title="local('Delete')" style="width: 30px; height: 30px" @click="resetFlow">
+                            <fv-button
+                                theme="dark"
+                                background="rgba(191, 95, 95, 0.6)"
+                                foreground="rgba(255, 255, 255, 1)"
+                                border-color="whitesmoke"
+                                border-radius="30"
+                                :title="local('Delete')"
+                                style="width: 30px; height: 30px"
+                                @click="resetFlow"
+                            >
                                 <i class="ms-Icon ms-Icon--Delete"></i>
                             </fv-button>
                         </div>
                     </template>
                 </fv-command-bar>
-                <current-pipeline-block v-model="currentPipeline" :taskId="executionInfo.task_id"
-                    @recover-click="recoverPipeline"></current-pipeline-block>
+                <current-pipeline-block
+                    v-model="currentPipeline"
+                    :taskId="executionInfo.task_id"
+                    @recover-click="recoverPipeline"
+                ></current-pipeline-block>
             </div>
         </div>
         <page-loading :model-value="!lock.loading" title="Loading..."></page-loading>
-        <datasetPanel v-model="show.dataset" :title="local('Dataset')" @confirm="confirmDataset"></datasetPanel>
+        <datasetPanel
+            v-model="show.dataset"
+            :title="local('Dataset')"
+            @confirm="confirmDataset"
+        ></datasetPanel>
         <operatorPanel v-model="show.operator" :title="local('Operator')"></operatorPanel>
-        <fv-right-menu :theme="theme" v-model="show.serving" class="serving-menu" ref="servingMenu"
-            :rightMenuWidth="250" :background="theme === 'dark' ? 'rgba(30, 30, 30, 1)' : 'rgba(255, 255, 255, 0.3)'"
-            :fullExpandAnimation="true" style="z-index: 6">
-            <p style="
+        <fv-right-menu
+            :theme="theme"
+            v-model="show.serving"
+            class="serving-menu"
+            ref="servingMenu"
+            :rightMenuWidth="250"
+            :background="theme === 'dark' ? 'rgba(30, 30, 30, 1)' : 'rgba(255, 255, 255, 0.3)'"
+            :fullExpandAnimation="true"
+            style="z-index: 6"
+        >
+            <p
+                style="
                     width: calc(100% - 20px);
                     margin: 10px;
                     font-size: 12px;
                     font-weight: bold;
                     user-select: none;
                     cursor: default;
-                ">
+                "
+            >
                 {{ local('Select Serving') }}
             </p>
             <hr />
-            <span class="serving-item" :class="{ choosen: currentServing && currentServing.id === servingItem.id }"
-                v-for="servingItem in servingList" :key="servingItem.id" @click="chooseServing(servingItem)">
+            <span
+                class="serving-item"
+                :class="{ choosen: currentServing && currentServing.id === servingItem.id }"
+                v-for="servingItem in servingList"
+                :key="servingItem.id"
+                @click="chooseServing(servingItem)"
+            >
                 <p class="main-title">{{ servingItem.name }}</p>
                 <p class="sec-title">{{ servingItem.cls_name }}</p>
             </span>
             <hr />
-            <fv-button :theme="theme" :icon="servingList.length > 0 ? '' : 'Add'" border-radius="8"
+            <fv-button
+                :theme="theme"
+                :icon="servingList.length > 0 ? '' : 'Add'"
+                border-radius="8"
                 style="width: calc(100% - 20px); margin-left: 10px; margin-top: 5px"
-                @click="$Go('/m/serving'), (show.serving = false)">{{
+                @click="$Go('/m/serving'), (show.serving = false)"
+                >{{
                     servingList.length > 0 ? local('Serving Manage') : local('Add Serving')
-                }}</fv-button>
+                }}</fv-button
+            >
         </fv-right-menu>
-        <pipelinePanel v-model="show.pipelinePanel" :add-panel-mode="'custom'" :title="local('Pipeline')"
-            @confirm="addPipeline"></pipelinePanel>
-        <execResultPanel v-model="show.execResult" :title="local('Execute Result')" :current-pipeline="currentPipeline"
-            :current-step="executionInfo.currentStep" :running-result="executionInfo.runningResult"></execResultPanel>
-        <taskPanel v-model="show.taskPanel" :title="local('Executions')" :current-pipeline="currentPipeline"
-            @confirm="handleWatchExecution"></taskPanel>
+        <pipelinePanel
+            v-model="show.pipelinePanel"
+            :add-panel-mode="'custom'"
+            :title="local('Pipeline')"
+            @confirm="addPipeline"
+        ></pipelinePanel>
+        <execResultPanel
+            v-model="show.execResult"
+            :title="local('Execute Result')"
+            :current-pipeline="currentPipeline"
+            :current-step="executionInfo.currentStep"
+            :running-result="executionInfo.runningResult"
+        ></execResultPanel>
+        <taskPanel
+            v-model="show.taskPanel"
+            :title="local('Executions')"
+            :current-pipeline="currentPipeline"
+            @confirm="handleWatchExecution"
+        ></taskPanel>
     </div>
 </template>
 
@@ -140,7 +273,7 @@ import saveIcon from '@/assets/flow/save.svg'
 import axios from '@/axios/config'
 
 export default {
-    name: "dataflowPage",
+    name: 'dataflowPage',
     components: {
         mainFlow,
         pipeline,
@@ -217,7 +350,7 @@ export default {
             executionInfo: {
                 task_id: null,
                 currentStep: null,
-                runningResult: null,
+                runningResult: null
             },
             timer: {
                 exec: null
@@ -513,7 +646,7 @@ export default {
                         })
                     }
                 })
-                .catch((err) => {
+                .catch(() => {
                     this.$barWarning(this.local('Pipeline update failed'), {
                         status: 'error'
                     })
@@ -577,15 +710,14 @@ export default {
                         this.$barWarning(this.local('Pipeline has been executed'), {
                             status: 'correct'
                         })
-                    }
-                    else {
+                    } else {
                         this.$barWarning(this.local('Pipeline execution failed') + res.message, {
                             status: 'warning'
                         })
                         this.lock.running = true
                     }
                 })
-                .catch((err) => {
+                .catch(() => {
                     this.$barWarning(this.local('Pipeline execution failed'), {
                         status: 'error'
                     })
@@ -603,7 +735,7 @@ export default {
             let isSaved = await this.handleSaveClick()
             if (!isSaved) {
                 this.lock.running = true
-                return;
+                return
             }
             await this.executePipeline()
         },
@@ -623,7 +755,7 @@ export default {
             return parts
                 .map((part, index) => {
                     if (index === 0) {
-                        return part.replace(/\/+$/, '')   // 去掉结尾 /
+                        return part.replace(/\/+$/, '') // 去掉结尾 /
                     }
                     return part.replace(/^\/+|\/+$/g, '') // 去掉两边 /
                 })
@@ -632,9 +764,10 @@ export default {
         downloadData(pipeline_idx) {
             if (!this.executionInfo.task_id) return
             let baseURL = axios.defaults.baseURL
-            let url =
-                this.pathJoin(baseURL,
-                    `/api/v1/tasks/execution/${this.executionInfo.task_id}/download?step=${pipeline_idx - 1}`)
+            let url = this.pathJoin(
+                baseURL,
+                `/api/v1/tasks/execution/${this.executionInfo.task_id}/download?step=${pipeline_idx - 1}`
+            )
             window.open(url, '_blank')
         },
         selectPipelineCallback() {
@@ -696,7 +829,7 @@ export default {
                 if (this.execution.status === 'completed') {
                     clearInterval(this.timer.exec)
                     this.lock.running = true
-                } else if (this.execution.status === "cancelled") {
+                } else if (this.execution.status === 'cancelled') {
                     clearInterval(this.timer.exec)
                     this.lock.running = true
                 } else if (this.execution.status === 'failed') {
@@ -802,7 +935,7 @@ export default {
                 }
             }
         },
-        onConnectStart(params) { },
+        onConnectStart() {},
         onConnectEnd(event) {
             console.log(event)
         },

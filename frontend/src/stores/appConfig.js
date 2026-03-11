@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useAppConfig = defineStore('useAppConfig', () => {
-    const screenWidth = ref(999999999);
+    const screenWidth = ref(999999999)
     const config = ref({
         language: 'en'
     })
@@ -24,12 +24,11 @@ export const useAppConfig = defineStore('useAppConfig', () => {
         config.value.language = val
     }
 
-    const local = text => {
+    const local = (text) => {
         return computed(() => {
-            let result = i18n.value[text];
-            if (!result)
-                return text;
-            return result[config.value.language];
+            let result = i18n.value[text]
+            if (!result) return text
+            return result[config.value.language]
         }).value
     }
 

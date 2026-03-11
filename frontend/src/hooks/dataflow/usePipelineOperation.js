@@ -7,7 +7,6 @@ import { useVueFlow } from '@vue-flow/core'
  * @returns 管道操作相关的方法集合
  */
 export function usePipelineOperation() {
-
     /**
      * 添加管道节点到Vue Flow流程图中
      * @param {Object} data - 节点数据，包含节点配置信息
@@ -48,7 +47,16 @@ export function usePipelineOperation() {
      * @param {Function} $nextTick - Vue的nextTick函数
      * @param {Function} $emit - 组件的事件发射函数
      */
-    const renderPipeline = async (pipelineConfig, flowId, datasets, flatFormatedOperators, proxy, $nextTick, $emit, $Guid) => {
+    const renderPipeline = async (
+        pipelineConfig,
+        flowId,
+        datasets,
+        flatFormatedOperators,
+        proxy,
+        $nextTick,
+        $emit,
+        $Guid
+    ) => {
         // 获取应用配置
         const appConfig = useAppConfig()
 
@@ -102,9 +110,7 @@ export function usePipelineOperation() {
                 proxy.$api.operators.get_operator_detail_by_name(item.name).then((res) => {
                     if (res.code === 200) {
                         // 查找对应的格式化操作符
-                        let operator = flatFormatedOperators.find(
-                            (it) => it.name === item.name
-                        )
+                        let operator = flatFormatedOperators.find((it) => it.name === item.name)
                         // 深拷贝操作符对象
                         operator = Object.assign({}, operator)
                         // 合并API返回的详细信息

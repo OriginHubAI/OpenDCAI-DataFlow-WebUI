@@ -63,6 +63,7 @@ import { useAppConfig } from '@/stores/appConfig'
 import mainBG from '@/assets/pku/pku.jpg'
 
 export default {
+    name: 'ClientHomeIndex',
     components: {
         bannerBlock,
         bottomBlock,

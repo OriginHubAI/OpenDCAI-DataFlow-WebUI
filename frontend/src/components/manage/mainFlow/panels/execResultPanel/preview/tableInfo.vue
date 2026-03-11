@@ -2,8 +2,14 @@
     <div class="table-wrapper" :class="[{ dark: theme == 'dark' }]">
         <i v-show="!tableInfo.length" class="empty-icon ms-Icon ms-Icon--Important"></i>
         <p v-show="!tableInfo.length" class="empty-title">{{ local('No Data') }}</p>
-        <fv-details-list :theme="theme" v-show="tableInfo.length" :model-value="tableInfo" :head="heads" ref="table"
-            style="width: 100%; height: 100%">
+        <fv-details-list
+            :theme="theme"
+            v-show="tableInfo.length"
+            :model-value="tableInfo"
+            :head="heads"
+            ref="table"
+            style="width: 100%; height: 100%"
+        >
             <template v-for="(col, i) in heads" :key="i + 1" v-slot:[`column_${i}`]="x">
                 <p :title="i == 0 ? x.row_index + 1 : x.item[col.key] ? x.item[col.key] : ''">
                     {{ i == 0 ? x.row_index + 1 : x.item[col.key] ? x.item[col.key] : '' }}
@@ -16,12 +22,12 @@
 <script>
 import { mapState } from 'pinia'
 import { useAppConfig } from '@/stores/appConfig'
-import { useTheme } from '@/stores/theme';
+import { useTheme } from '@/stores/theme'
 
 export default {
     props: {
         tableInfo: {
-            type: Object,
+            type: Array,
             default: () => []
         }
     },
@@ -32,7 +38,7 @@ export default {
     },
     watch: {
         tableInfo: {
-            handler(newVal, oldVal) {
+            handler(newVal) {
                 if (newVal.length) this.getHeads()
             },
             deep: true

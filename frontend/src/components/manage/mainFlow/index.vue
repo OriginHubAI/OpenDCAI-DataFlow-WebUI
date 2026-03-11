@@ -1,22 +1,47 @@
 <template>
     <div class="df-main-flow-container">
-        <VueFlow class="main-flow" :id="id" v-model:nodes="thisNodes" v-model:edges="thisEdges" @dragover="dragOver"
-            @drop="drop" @dragleave="dragLeave" @connect="$emit('connect', $event)"
-            @connect-end="$emit('connect-end', $event)" @connect-start="$emit('connect-start', $event)">
-            <Background variant="dots" gap="20" size="3" :color="'rgba(200, 200, 200, 0.3)'" :style="{
-                backgroundColor: isDragOver ? 'rgba(87, 99, 206, 0.05)' : 'transparent',
-                transition: 'background-color 0.2s ease'
-            }"></Background>
+        <VueFlow
+            class="main-flow"
+            :id="id"
+            v-model:nodes="thisNodes"
+            v-model:edges="thisEdges"
+            @dragover="dragOver"
+            @drop="drop"
+            @dragleave="dragLeave"
+            @connect="$emit('connect', $event)"
+            @connect-end="$emit('connect-end', $event)"
+            @connect-start="$emit('connect-start', $event)"
+        >
+            <Background
+                variant="dots"
+                gap="20"
+                size="3"
+                :color="'rgba(200, 200, 200, 0.3)'"
+                :style="{
+                    backgroundColor: isDragOver ? 'rgba(87, 99, 206, 0.05)' : 'transparent',
+                    transition: 'background-color 0.2s ease'
+                }"
+            ></Background>
             <template #node-base-node="nodeProps">
                 <baseNode v-bind="nodeProps" @delete-node="deleteNode" />
             </template>
             <template #node-database-node="nodeProps">
-                <databaseNode v-bind="nodeProps" @delete-node="deleteNode" @switch-database="switchDatabase"
-                    @update-node-data="updateNodeData" />
+                <databaseNode
+                    v-bind="nodeProps"
+                    @delete-node="deleteNode"
+                    @switch-database="switchDatabase"
+                    @update-node-data="updateNodeData"
+                />
             </template>
             <template #node-operator-node="nodeProps">
-                <operatorNode v-bind="nodeProps" @delete-node="deleteNode" @update-node-data="updateNodeData"
-                    @update-run-value="updateRunValue" @show-details="showDetails" @download-data="downloadData" />
+                <operatorNode
+                    v-bind="nodeProps"
+                    @delete-node="deleteNode"
+                    @update-node-data="updateNodeData"
+                    @update-run-value="updateRunValue"
+                    @show-details="showDetails"
+                    @download-data="downloadData"
+                />
             </template>
 
             <template #connection-line="connectionLineProps">
@@ -28,6 +53,12 @@
         </VueFlow>
     </div>
 </template>
+
+<script>
+export default {
+    name: 'MainFlowIndex'
+}
+</script>
 
 <script setup>
 import { ref, watch, computed } from 'vue'

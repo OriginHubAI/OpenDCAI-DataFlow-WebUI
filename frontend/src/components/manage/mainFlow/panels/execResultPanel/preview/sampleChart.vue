@@ -32,33 +32,33 @@ const props = defineProps({
         default: 'Sample Count'
     },
     rawData: {
-        default: () => ([])
+        default: () => []
     },
     theme: {
         default: 'light'
     }
 })
 
-watch(() => props.rawData, (newVal, oldVal) => {
-    if (newVal === oldVal) return
-    chartInstance?.destroy()
-    updateChart()
-})
+watch(
+    () => props.rawData,
+    (newVal, oldVal) => {
+        if (newVal === oldVal) return
+        chartInstance?.destroy()
+        updateChart()
+    }
+)
 
 function updateChart() {
-    const steps = Object.values(props.rawData)
-        .sort((a, b) => a.index - b.index)
+    const steps = Object.values(props.rawData).sort((a, b) => a.index - b.index)
 
-    const labels = steps.map(i => `S${i.index + 1}: ${i.name}`)
-    const values = steps.map(i => i.sample_count)
+    const labels = steps.map((i) => `S${i.index + 1}: ${i.name}`)
+    const values = steps.map((i) => i.sample_count)
 
     function genColorByIndex(index, alpha = 0.3) {
-        const hue = (index * 47) % 360   // 47 是经验值，分布很均匀
+        const hue = (index * 47) % 360 // 47 是经验值，分布很均匀
         return `hsla(${hue}, 70%, 55%, ${alpha})`
     }
-    const barColors = steps.map((_, idx) =>
-        genColorByIndex(idx, 0.35)
-    )
+    const barColors = steps.map((_, idx) => genColorByIndex(idx, 0.35))
 
     chartInstance = new Chart(canvasRef.value, {
         data: {
@@ -104,47 +104,43 @@ function updateChart() {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        title: ctx => {
+                        title: (ctx) => {
                             const step = steps[ctx[0].dataIndex]
                             return `Step: ${step.index + 1}\n${step.name}`
                         },
-                        label: ctx => `Samples: ${ctx.parsed.y}`
+                        label: (ctx) => `Samples: ${ctx.parsed.y}`
                     }
                 }
             },
             scales: {
                 x: {
                     grid: {
-                        color: props.theme === 'dark'
-                            ? 'rgba(200, 200, 200, 0.1)'
-                            : 'rgba(120, 120, 120, 0.1)'
+                        color:
+                            props.theme === 'dark'
+                                ? 'rgba(200, 200, 200, 0.1)'
+                                : 'rgba(120, 120, 120, 0.1)'
                     },
                     ticks: {
                         maxRotation: 0,
                         minRotation: 0,
-                        color: props.theme === 'dark'
-                            ? 'whitesmoke'
-                            : 'rgba(0, 0, 0, 0.7)',
+                        color: props.theme === 'dark' ? 'whitesmoke' : 'rgba(0, 0, 0, 0.7)',
                         callback: function (value) {
                             const label = this.getLabelForValue(value)
                             const maxLen = 16
-                            return label.length > maxLen
-                                ? label.slice(0, maxLen) + '…'
-                                : label
+                            return label.length > maxLen ? label.slice(0, maxLen) + '…' : label
                         }
                     }
                 },
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: props.theme === 'dark'
-                            ? 'rgba(200, 200, 200, 0.1)'
-                            : 'rgba(120, 120, 120, 0.1)'
+                        color:
+                            props.theme === 'dark'
+                                ? 'rgba(200, 200, 200, 0.1)'
+                                : 'rgba(120, 120, 120, 0.1)'
                     },
                     ticks: {
-                        color: props.theme === 'dark'
-                            ? 'whitesmoke'
-                            : 'rgba(0, 0, 0, 0.7)'
+                        color: props.theme === 'dark' ? 'whitesmoke' : 'rgba(0, 0, 0, 0.7)'
                     }
                 }
             }
@@ -162,7 +158,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div style="width: 100%; height: 300px;">
+    <div style="width: 100%; height: 300px">
         <canvas ref="canvasRef" />
     </div>
 </template>

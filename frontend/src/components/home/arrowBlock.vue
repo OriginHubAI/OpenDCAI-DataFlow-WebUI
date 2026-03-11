@@ -1,13 +1,20 @@
 <template>
     <div class="arrow-container">
         <div class="arrow-row-block" v-for="(item, i) in rows" :key="i">
-            <p class="arrow-unit" v-for="(item, j) in cols" :key="`${i},${j}`" :style="getArrowStyle(i, j)">→</p>
+            <p
+                class="arrow-unit"
+                v-for="(item, j) in cols"
+                :key="`${i},${j}`"
+                :style="getArrowStyle(i, j)"
+            >
+                →
+            </p>
         </div>
     </div>
 </template>
 
 <script>
-import gsap from "gsap";
+import gsap from 'gsap'
 
 export default {
     data() {
@@ -21,11 +28,10 @@ export default {
         }
     },
     watch: {
-        angle() {
-        }
+        angle() {}
     },
     mounted() {
-        this.loop();
+        this.loop()
     },
     methods: {
         loop() {
@@ -42,17 +48,17 @@ export default {
         // 计算每个箭头的旋转角度和颜色
         getArrowStyle(i, j) {
             // 计算一个模拟的磁场方向（你可以换成真实磁场数据）
-            const angle = Math.sin(i * 0.1) * Math.cos(j * 0.1) * this.angle; // 角度
-            const intensity = Math.abs(Math.sin(i * 0.05) * Math.cos(j * 0.05)); // 强度
+            const angle = Math.sin(i * 0.1) * Math.cos(j * 0.1) * this.angle // 角度
+            const intensity = Math.abs(Math.sin(i * 0.05) * Math.cos(j * 0.05)) // 强度
 
             // 颜色渐变从淡红到深红
-            const color = `rgb(${Math.floor(this.colorR * intensity)}, ${this.colorG}, ${Math.floor(this.colorB * (1 - intensity))})`;
+            const color = `rgb(${Math.floor(this.colorR * intensity)}, ${this.colorG}, ${Math.floor(this.colorB * (1 - intensity))})`
 
             return {
                 transform: `rotate(${angle}deg)`, // 旋转
-                color: color, // 颜色
-            };
-        },
+                color: color // 颜色
+            }
+        }
     }
 }
 </script>

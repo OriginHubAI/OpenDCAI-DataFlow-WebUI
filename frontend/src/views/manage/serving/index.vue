@@ -5,52 +5,107 @@
                 <p class="main-title">{{ local('Serving') }}</p>
             </div>
             <div class="content-block">
-                <fv-Collapse :theme="theme" v-model="show.add" class="serving-item" icon="Marquee"
-                    :title="local('Add Serving')" :content="local('Add new serving information.')"
-                    :disabled-collapse="true" :max-height="'auto'">
+                <fv-Collapse
+                    :theme="theme"
+                    v-model="show.add"
+                    class="serving-item"
+                    icon="Marquee"
+                    :title="local('Add Serving')"
+                    :content="local('Add new serving information.')"
+                    :disabled-collapse="true"
+                    :max-height="'auto'"
+                >
                     <template v-slot:extension>
-                        <fv-button v-show="show.add" theme="dark" :is-box-shadow="true" :background="gradient"
-                            :disabled="!checkAdd() || !lock.add" border-radius="6"
-                            style="width: 90px; margin-right: 5px" @click="confirmAdd">
+                        <fv-button
+                            v-show="show.add"
+                            theme="dark"
+                            :is-box-shadow="true"
+                            :background="gradient"
+                            :disabled="!checkAdd() || !lock.add"
+                            border-radius="6"
+                            style="width: 90px; margin-right: 5px"
+                            @click="confirmAdd"
+                        >
                             {{ local('Confirm') }}
                         </fv-button>
-                        <fv-button :theme="show.add ? theme : 'dark'" :is-box-shadow="true"
-                            :background="show.add ? '' : gradient" border-radius="6" style="width: 90px"
-                            @click="handleAdd">
+                        <fv-button
+                            :theme="show.add ? theme : 'dark'"
+                            :is-box-shadow="true"
+                            :background="show.add ? '' : gradient"
+                            border-radius="6"
+                            style="width: 90px"
+                            @click="handleAdd"
+                        >
                             {{ show.add ? local('Cancel') : local('Add') }}
                         </fv-button>
                     </template>
                     <template v-slot:default>
                         <div class="serving-item-row column">
                             <p class="serving-item-light-title">{{ local('Serving Name') }}</p>
-                            <fv-text-box :theme="theme" v-model="servingName" :placeholder="local('Serving Name')"
-                                border-radius="6" :reveal-border="true" :is-box-shadow="true"></fv-text-box>
+                            <fv-text-box
+                                :theme="theme"
+                                v-model="servingName"
+                                :placeholder="local('Serving Name')"
+                                border-radius="6"
+                                :reveal-border="true"
+                                :is-box-shadow="true"
+                            ></fv-text-box>
                         </div>
                         <hr />
                         <div class="serving-item-row column">
                             <p class="serving-item-light-title">{{ local('Select CLS Name') }}</p>
-                            <fv-combobox :theme="theme" v-model="choosenClsItem" :options="createProps"
-                                :placeholder="local('Select CLS Name')" :border-radius="6"
-                                :input-background="theme === 'dark' ? 'rgba(40, 40, 40, 1)' : 'rgba(252, 252, 252, 1)'"></fv-combobox>
+                            <fv-combobox
+                                :theme="theme"
+                                v-model="choosenClsItem"
+                                :options="createProps"
+                                :placeholder="local('Select CLS Name')"
+                                :border-radius="6"
+                                :input-background="
+                                    theme === 'dark'
+                                        ? 'rgba(40, 40, 40, 1)'
+                                        : 'rgba(252, 252, 252, 1)'
+                                "
+                            ></fv-combobox>
                         </div>
                         <hr />
-                        <div v-if="choosenClsItem && choosenClsItem.params"
-                            v-for="(param, p_index) in choosenClsItem.params">
-                            <div class="serving-item-row column">
-                                <p class="serving-item-light-title">{{ param.name }}</p>
-                                <fv-text-box :theme="theme" v-model="param.value" :placeholder="local(param.name)"
-                                    border-radius="6" :reveal-border="true" :is-box-shadow="true"></fv-text-box>
+                        <template v-if="choosenClsItem && choosenClsItem.params">
+                            <div v-for="param in choosenClsItem.params" :key="param.name">
+                                <div class="serving-item-row column">
+                                    <p class="serving-item-light-title">{{ param.name }}</p>
+                                    <fv-text-box
+                                        :theme="theme"
+                                        v-model="param.value"
+                                        :placeholder="local(param.name)"
+                                        border-radius="6"
+                                        :reveal-border="true"
+                                        :is-box-shadow="true"
+                                    ></fv-text-box>
+                                </div>
+                                <hr />
                             </div>
-                            <hr />
-                        </div>
+                        </template>
                     </template>
                 </fv-Collapse>
-                <fv-Collapse :theme="theme" v-for="(item, index) in servingList" :key="index" class="serving-item"
-                    icon="DialShape4" :title="item.name" :content="item.cls_name" :max-height="740">
+                <fv-Collapse
+                    :theme="theme"
+                    v-for="(item, index) in servingList"
+                    :key="index"
+                    class="serving-item"
+                    icon="DialShape4"
+                    :title="item.name"
+                    :content="item.cls_name"
+                    :max-height="740"
+                >
                     <template v-slot:extension>
-                        <fv-button theme="dark" background="rgba(191, 95, 95, 1)" foreground="rgba(255, 255, 255, 1)"
-                            border-radius="6" :is-box-shadow="true" style="width: 90px"
-                            @click="$event.stopPropagation(), delServing(item)">
+                        <fv-button
+                            theme="dark"
+                            background="rgba(191, 95, 95, 1)"
+                            foreground="rgba(255, 255, 255, 1)"
+                            border-radius="6"
+                            :is-box-shadow="true"
+                            style="width: 90px"
+                            @click="$event.stopPropagation(), delServing(item)"
+                        >
                             {{ local('Delete') }}
                         </fv-button>
                     </template>
@@ -61,46 +116,78 @@
                                 <p class="serving-item-light-title">{{ local('ID') }}</p>
                                 <p class="serving-item-std-info">{{ item.id }}</p>
                             </div>
-                            <fv-button v-show="item.edit" theme="dark" :is-box-shadow="true" :background="gradient"
-                                border-radius="6" :disabled="!checkEdit(item) || !lock.edit"
-                                style="width: 90px; margin-right: 5px" @click="confirmEdit(item)">
+                            <fv-button
+                                v-show="item.edit"
+                                theme="dark"
+                                :is-box-shadow="true"
+                                :background="gradient"
+                                border-radius="6"
+                                :disabled="!checkEdit(item) || !lock.edit"
+                                style="width: 90px; margin-right: 5px"
+                                @click="confirmEdit(item)"
+                            >
                                 {{ local('Confirm') }}
                             </fv-button>
-                            <fv-button :theme="theme" :icon="item.edit ? 'Cancel' : 'Edit'" :is-box-shadow="true"
-                                border-radius="6" style="width: 90px" @click="handleEdit(item)">
+                            <fv-button
+                                :theme="theme"
+                                :icon="item.edit ? 'Cancel' : 'Edit'"
+                                :is-box-shadow="true"
+                                border-radius="6"
+                                style="width: 90px"
+                                @click="handleEdit(item)"
+                            >
                                 {{ item.edit ? local('Cancel') : local('Edit') }}
                             </fv-button>
                         </div>
                         <hr />
                         <div class="serving-item-row column">
                             <p class="serving-item-light-title">{{ local('Serving Name') }}</p>
-                            <fv-text-box :theme="theme" v-model="item.serving_name" border-radius="6"
-                                :disabled="!item.edit" :reveal-border="true" :is-box-shadow="item.edit"></fv-text-box>
+                            <fv-text-box
+                                :theme="theme"
+                                v-model="item.serving_name"
+                                border-radius="6"
+                                :disabled="!item.edit"
+                                :reveal-border="true"
+                                :is-box-shadow="item.edit"
+                            ></fv-text-box>
                         </div>
                         <hr />
-                        <div v-for="(param, p_index) in item.params">
+                        <div v-for="param in item.params" :key="param.name">
                             <div class="serving-item-row column">
                                 <p class="serving-item-light-title">{{ param.name }}</p>
-                                <fv-text-box :theme="theme" v-model="param.value" border-radius="6"
-                                    :disabled="!item.edit" :reveal-border="true"
-                                    :is-box-shadow="item.edit"></fv-text-box>
+                                <fv-text-box
+                                    :theme="theme"
+                                    v-model="param.value"
+                                    border-radius="6"
+                                    :disabled="!item.edit"
+                                    :reveal-border="true"
+                                    :is-box-shadow="item.edit"
+                                ></fv-text-box>
                             </div>
                             <hr />
                         </div>
                         <div class="serving-item-row column">
                             <p class="serving-item-title">{{ local('Serving Testing') }}</p>
                             <div class="serving-item-row no-pad">
-                                <fv-button :theme="theme" border-radius="8" style="width: 30px; height: 30px"
-                                    :disabled="!lock.test" :reveal-border-gradient-list="[
+                                <fv-button
+                                    :theme="theme"
+                                    border-radius="8"
+                                    style="width: 30px; height: 30px"
+                                    :disabled="!lock.test"
+                                    :reveal-border-gradient-list="[
                                         '#40e0d0',
                                         '#40e0d0',
                                         '#ff8c00',
                                         '#ff8c00',
                                         '#ff0080',
                                         'rgba(255, 255, 255, 0)'
-                                    ]" @click="testServing(item)">
-                                    <i class="ms-Icon ms-Icon--ProgressRingDots rainbow"
-                                        :class="[{ 'ring-animation': !lock.test }]"></i>
+                                    ]"
+                                    @click="testServing(item)"
+                                >
+                                    <i
+                                        class="ms-Icon ms-Icon--ProgressRingDots rainbow"
+                                        :class="[{ 'ring-animation': !lock.test }]"
+                                    ></i>
                                 </fv-button>
                                 <p class="serving-item-bold-info" style="margin-left: 15px">
                                     {{ local('Response') }}: {{ item.response }}
@@ -118,9 +205,10 @@
 import { mapActions, mapState } from 'pinia'
 import { useAppConfig } from '@/stores/appConfig'
 import { useTheme } from '@/stores/theme'
-import { useDataflow } from '@/stores/dataflow';
+import { useDataflow } from '@/stores/dataflow'
 
 export default {
+    name: 'ServingIndex',
     data() {
         return {
             createProps: [],
@@ -132,18 +220,17 @@ export default {
                 int: '0',
                 Any: '',
                 float: '0.0',
-                'dict': {}
+                dict: {}
             },
             formatValues: {
                 str: (val) => val.toString(),
                 int: (val) => parseInt(val),
                 Any: (val) => val.toString(),
                 float: (val) => parseFloat(val),
-                'dict': (val) => {
+                dict: (val) => {
                     try {
                         return JSON.parse(val)
-                    }
-                    catch (error) {
+                    } catch (error) {
                         return {}
                     }
                 }
@@ -169,7 +256,7 @@ export default {
     },
     methods: {
         ...mapActions(useDataflow, {
-            getGlobalServingList: 'getServingList',
+            getGlobalServingList: 'getServingList'
         }),
         getCreateProps() {
             this.$api.serving.list_serving_classes().then((res) => {
@@ -208,7 +295,8 @@ export default {
             this.servingName = ''
             if (this.choosenClsItem.params) {
                 for (let param of this.choosenClsItem.params) {
-                    if (param.default_value !== null) param.value = this.formatPropsValue(param.default_value)
+                    if (param.default_value !== null)
+                        param.value = this.formatPropsValue(param.default_value)
                     else param.value = this.defaultValues[param.type]
                 }
             }
@@ -219,7 +307,8 @@ export default {
                 for (let param of item.params) {
                     param.value = this.formatPropsValue(param.value)
                     if (overide) {
-                        if (param.value !== null) param.default_value = this.formatPropsValue(param.value)
+                        if (param.value !== null)
+                            param.default_value = this.formatPropsValue(param.value)
                     } else {
                         if (param.default_value !== null)
                             param.value = this.formatPropsValue(param.default_value)

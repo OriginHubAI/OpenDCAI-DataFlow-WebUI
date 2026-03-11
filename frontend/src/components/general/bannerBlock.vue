@@ -48,7 +48,7 @@
                     :beak="10"
                     :space="0"
                     :popper-style="{ width: '150px' }"
-                    :visible.sync="show.menu"
+                    v-model:visible="show.menu"
                 >
                     <div v-if="islogin" class="sosd-avatar-container">
                         <fv-img :src="avatar"></fv-img>
@@ -126,7 +126,7 @@
                         :beak="10"
                         :space="0"
                         :popper-style="{ width: '150px' }"
-                        :visible.sync="show.mobileMenu"
+                        v-model:visible="show.mobileMenu"
                     >
                         <div v-if="islogin" class="sosd-avatar-container">
                             <fv-img :src="avatar"></fv-img>

@@ -8,6 +8,4 @@ export default {
     }
 }
 
-export {
-    api
-}
+export { api }

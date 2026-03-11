@@ -1,13 +1,17 @@
 <template>
-    <div class="df-flow-default-list-node" :class="[{ dark: props.theme == 'dark' }, { selected: selected }]" :style="{
-        '--node-background': thisData.background,
-        '--node-icon-color': thisData.iconColor,
-        '--node-border-color': thisData.borderColor,
-        '--node-shadow-color': thisData.shadowColor,
-        '--node-group-background': thisData.groupBackground,
-        '--node-title-color': thisData.titleColor,
-        '--node-status-color': thisData.statusColor
-    }">
+    <div
+        class="df-flow-default-list-node"
+        :class="[{ dark: props.theme == 'dark' }, { selected: selected }]"
+        :style="{
+            '--node-background': thisData.background,
+            '--node-icon-color': thisData.iconColor,
+            '--node-border-color': thisData.borderColor,
+            '--node-shadow-color': thisData.shadowColor,
+            '--node-group-background': thisData.groupBackground,
+            '--node-title-color': thisData.titleColor,
+            '--node-status-color': thisData.statusColor
+        }"
+    >
         <div class="node-banner">
             <div class="icon-block" :style="{ background: thisData.iconBackground }">
                 <i v-if="!thisData.img" class="ms-Icon" :class="[`ms-Icon--${thisData.icon}`]"></i>
@@ -18,9 +22,15 @@
                 <p class="main-title" :title="thisData.label">{{ thisData.label }}</p>
             </div>
             <div class="control-block">
-                <fv-button v-if="thisData.enableDelete" theme="dark" border-radius="8" :font-size="12"
-                    background="rgba(215, 95, 95, 1)" border-color="rgba(255, 255, 255, 0.1)"
-                    style="width: 25px; height: 25px">
+                <fv-button
+                    v-if="thisData.enableDelete"
+                    theme="dark"
+                    border-radius="8"
+                    :font-size="12"
+                    background="rgba(215, 95, 95, 1)"
+                    border-color="rgba(255, 255, 255, 0.1)"
+                    style="width: 25px; height: 25px"
+                >
                     <i class="ms-Icon ms-Icon--Cancel"></i>
                 </fv-button>
             </div>

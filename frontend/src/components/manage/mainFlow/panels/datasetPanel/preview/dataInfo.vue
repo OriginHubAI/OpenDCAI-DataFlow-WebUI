@@ -44,4 +44,7 @@ const props = defineProps({
         default: () => ({})
     }
 })
+
+// avoid unused warning if props is not used elsewhere in script setup
+console.log(props)
 </script>

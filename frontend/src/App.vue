@@ -8,7 +8,7 @@
 import i18n from '@/js/i18n.js'
 import { mapActions } from 'pinia'
 import { useAppConfig } from '@/stores/appConfig'
-import { useTheme } from './stores/theme';
+import { useTheme } from './stores/theme'
 
 export default {
     name: 'App',
@@ -20,7 +20,7 @@ export default {
         }
     },
     watch: {
-        $route() { }
+        $route() {}
     },
     mounted() {
         this.getConfig()
@@ -37,7 +37,7 @@ export default {
             reviseTheme: 'reviseTheme'
         }),
         getConfig() {
-            this.$api.preferences.get_preferences_api_v1_preferences__get().then(res => {
+            this.$api.preferences.get_preferences_api_v1_preferences__get().then((res) => {
                 if (res.code === 200) {
                     if (res.data.language) {
                         this.reviseLanguage(res.data.language)
@@ -63,7 +63,7 @@ export default {
             }
         }
     },
-    beforeDestroy() {
+    beforeUnmount() {
         this.clearTimer()
     }
 }

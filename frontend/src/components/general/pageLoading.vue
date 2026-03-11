@@ -1,8 +1,10 @@
 <template>
     <div v-show="modelValue" class="df-page-loading" :class="[{ dark: theme === 'dark' }]">
-        <fv-progress-ring loading="true"
+        <fv-progress-ring
+            loading="true"
             :background="theme === 'dark' ? 'rgba(36, 36, 36, 0.8)' : 'rgba(245, 245, 245, 0.8)'"
-            :color="color"></fv-progress-ring>
+            :color="color"
+        ></fv-progress-ring>
         <div class="df-page-loading-title">{{ title }}</div>
     </div>
 </template>
@@ -28,10 +30,10 @@ export default {
         }
     },
     watch: {
-        modelValue(newVal, oldVal) {
+        modelValue(newVal) {
             this.thisValue = newVal
         },
-        thisValue(newVal, oldVal) {
+        thisValue(newVal) {
             this.$emit('update:modelValue', newVal)
         }
     },

@@ -18,6 +18,6 @@ export function useGlobal() {
         $Jump: proxy.$Jump,
         $Guid: proxy.$Guid,
         $infoBox: proxy.$infoBox,
-        $barWarning: proxy.$barWarning,
+        $barWarning: proxy.$barWarning
     }
 }

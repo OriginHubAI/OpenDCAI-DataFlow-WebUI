@@ -1,36 +1,61 @@
 <template>
-    <div class="df-flow-default-node" :class="[{ 'dark': theme === 'dark' }, { selected: selected }]" :style="{
-        '--node-background': thisData.background,
-        '--node-icon-color': thisData.iconColor,
-        '--node-border-color': thisData.borderColor,
-        '--node-shadow-color': thisData.shadowColor,
-        '--node-group-background': thisData.groupBackground,
-        '--node-title-color': thisData.titleColor,
-        '--node-status-color': thisData.statusColor,
-        '--node-info-title-color': thisData.infoTitleColor,
-        '--default-handle-color': thisData.defaultHandleColor,
-        '--default-handle-shadow-color': thisData.defaultHandleShadowColor
-    }">
+    <div
+        class="df-flow-default-node"
+        :class="[{ dark: theme === 'dark' }, { selected: selected }]"
+        :style="{
+            '--node-background': thisData.background,
+            '--node-icon-color': thisData.iconColor,
+            '--node-border-color': thisData.borderColor,
+            '--node-shadow-color': thisData.shadowColor,
+            '--node-group-background': thisData.groupBackground,
+            '--node-title-color': thisData.titleColor,
+            '--node-status-color': thisData.statusColor,
+            '--node-info-title-color': thisData.infoTitleColor,
+            '--default-handle-color': thisData.defaultHandleColor,
+            '--default-handle-shadow-color': thisData.defaultHandleShadowColor
+        }"
+    >
         <div class="node-banner" :title="id">
             <div class="icon-block" :style="{ background: thisData.iconBackground }">
-                <i v-if="!thisData.img && !thisData.loading" class="ms-Icon" :class="[`ms-Icon--${thisData.icon}`]"></i>
-                <fv-img v-if="thisData.img && !thisData.loading" class="icon-img" :src="thisData.img"></fv-img>
-                <fv-progress-ring v-if="thisData.loading" :r="12" :loading="true" border-width="2" color="white"
-                    background="rgba(120, 120, 120, 0.1)"></fv-progress-ring>
+                <i
+                    v-if="!thisData.img && !thisData.loading"
+                    class="ms-Icon"
+                    :class="[`ms-Icon--${thisData.icon}`]"
+                ></i>
+                <fv-img
+                    v-if="thisData.img && !thisData.loading"
+                    class="icon-img"
+                    :src="thisData.img"
+                ></fv-img>
+                <fv-progress-ring
+                    v-if="thisData.loading"
+                    :r="12"
+                    :loading="true"
+                    border-width="2"
+                    color="white"
+                    background="rgba(120, 120, 120, 0.1)"
+                ></fv-progress-ring>
             </div>
             <div class="content-block">
                 <p class="sub-status" :title="thisData.status">{{ thisData.status }}</p>
                 <p class="main-title" :title="thisData.label">{{ thisData.label }}</p>
             </div>
             <div class="control-block" @mousedown.stop @click.stop>
-                <fv-button v-if="thisData.enableDelete" theme="dark" border-radius="8" :font-size="12"
-                    background="rgba(215, 95, 95, 1)" border-color="rgba(255, 255, 255, 0.1)"
-                    style="width: 25px; height: 25px" @click="
+                <fv-button
+                    v-if="thisData.enableDelete"
+                    theme="dark"
+                    border-radius="8"
+                    :font-size="12"
+                    background="rgba(215, 95, 95, 1)"
+                    border-color="rgba(255, 255, 255, 0.1)"
+                    style="width: 25px; height: 25px"
+                    @click="
                         $emit('delete-node', {
                             id: id,
                             data: thisData
                         })
-                        ">
+                    "
+                >
                     <i class="ms-Icon ms-Icon--Cancel"></i>
                 </fv-button>
             </div>
@@ -50,14 +75,27 @@
                 </div>
             </slot>
         </div>
-        <Handle v-if="thisData.useTargetHandle" :id="`node::target::node`" type="target" class="handle-item default"
-            :position="Position.Left" :style="{
+        <Handle
+            v-if="thisData.useTargetHandle"
+            :id="`node::target::node`"
+            type="target"
+            class="handle-item default"
+            :position="Position.Left"
+            :style="{
                 top: thisData.defaultTargetTop
-            }" />
-        <Handle v-if="thisData.useSourceHandle" :id="`node::source::node`" type="source" class="handle-item default"
-            :position="Position.Right" :style="{
+            }"
+        />
+        <Handle
+            v-if="thisData.useSourceHandle"
+            :id="`node::source::node`"
+            type="source"
+            class="handle-item default"
+            :position="Position.Right"
+            :style="{
                 top: thisData.defaultSourceHandleTop
-            }" Handle />
+            }"
+            Handle
+        />
     </div>
 </template>
 
@@ -164,7 +202,6 @@ const y = computed(() => `${Math.round(props.position.y)}px`)
         --default-handle-color: rgba(163, 164, 236, 1);
 
         .remain-content-block {
-
             .info-title {
                 color: whitesmoke;
             }

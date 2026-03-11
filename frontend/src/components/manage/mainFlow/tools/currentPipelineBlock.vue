@@ -1,13 +1,22 @@
 <template>
-    <div class="df-current-pipeline-container" :class="[{ template: isTemplate || taskId, dark: theme === 'dark' }]"
-        @mouseenter="inside = true" @mouseleave="inside = false">
+    <div
+        class="df-current-pipeline-container"
+        :class="[{ template: isTemplate || taskId, dark: theme === 'dark' }]"
+        @mouseenter="inside = true"
+        @mouseleave="inside = false"
+    >
         <div class="row-item">
             <div class="df-current-pipeline-title" :title="local('Current Pipeline')">
                 {{ displayName }}
             </div>
             <transition name="df-cp-scale-up-to-up">
-                <time-rounder v-if="modelValue" v-show="inside" :model-value="new Date(modelValue.updated_at)"
-                    :foreground="color" style="width: auto"></time-rounder>
+                <time-rounder
+                    v-if="modelValue"
+                    v-show="inside"
+                    :model-value="new Date(modelValue.updated_at)"
+                    :foreground="color"
+                    style="width: auto"
+                ></time-rounder>
             </transition>
         </div>
         <div v-if="isTemplate" class="row-item">
@@ -16,9 +25,14 @@
             </p>
         </div>
         <div v-if="taskId" class="row-item">
-            <fv-button :theme="theme" :border-radius="20" font-size="10"
-                style="width: 25px; height: 20px; flex-shrink: 0" :title="local('Recover Pipeline')"
-                @click="$emit('recover-click')">
+            <fv-button
+                :theme="theme"
+                :border-radius="20"
+                font-size="10"
+                style="width: 25px; height: 20px; flex-shrink: 0"
+                :title="local('Recover Pipeline')"
+                @click="$emit('recover-click')"
+            >
                 <i class="ms-Icon ms-Icon--Reply"></i>
             </fv-button>
             <p class="df-current-sec-info">{{ local('Execution') }}: {{ taskId }}</p>

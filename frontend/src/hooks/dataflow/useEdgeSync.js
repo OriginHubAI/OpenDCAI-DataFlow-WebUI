@@ -7,7 +7,7 @@ import { useVueFlow } from '@vue-flow/core'
 export function useEdgeSync() {
     /**
      * 解析Handle标识符字符串，转换为标准化的Handle对象
-     * 
+     *
      * @param {string|null|undefined} handleItem - Handle标识符字符串，格式为"name::direction::edgeType"
      * @returns {Object} 包含Handle信息的对象
      * @returns {string} return.name - Handle属性名
@@ -16,24 +16,25 @@ export function useEdgeSync() {
      */
     const decHandle = (handleItem) => {
         // 如果Handle标识符不存在，返回默认Handle配置
-        if (!handleItem) return {
-            name: 'default',
-            direction: 'source',
-            edgeType: 'default',
-        }
+        if (!handleItem)
+            return {
+                name: 'default',
+                direction: 'source',
+                edgeType: 'default'
+            }
 
-        let items = handleItem.split('::');
+        let items = handleItem.split('::')
 
         return {
-            name: items[0],       // Handle属性名
-            direction: items[1],  // 出入边方向
-            edgeType: items[2],   // 边类型
+            name: items[0], // Handle属性名
+            direction: items[1], // 出入边方向
+            edgeType: items[2] // 边类型
         }
     }
 
     /**
      * 同步算子节点的运行参数值到目标节点的运行参数中
-     * 
+     *
      * @param {Object} operatorNodeItem - 算子节点对象，包含节点ID和属性名
      * @param {string} flowId - 流程ID，用于获取VueFlow实例
      */
@@ -56,9 +57,9 @@ export function useEdgeSync() {
         }
     }
 
-    /** 
+    /**
      * 自动连接算子节点的运行参数边
-     * 
+     *
      * @param {string} source - 源算子节点ID
      * @param {string} target - 目标算子节点ID
      * @param {string} flowId - 流程ID，用于获取VueFlow实例
@@ -69,13 +70,19 @@ export function useEdgeSync() {
         let sourceNode = flow.findNode(source)
         let targetNode = flow.findNode(target)
         if (!sourceNode || !targetNode) return
-        let targetRuns = targetNode.data.operatorParams.run || [];
-        let sourceRuns = sourceNode.data.operatorParams.run || [];
+        let targetRuns = targetNode.data.operatorParams.run || []
+        let sourceRuns = sourceNode.data.operatorParams.run || []
         for (let i = 0; i < sourceRuns.length; i++) {
             let sourceRun = sourceRuns[i]
             let targetIndex = targetRuns.findIndex((item) => item.name === sourceRun.name)
             if (targetIndex !== -1) {
-                let existsEdge = flow.edges.value.find((edge) => edge.source === source && edge.target === target && edge.sourceHandle === `${sourceRun.name}::source::run_key` && edge.targetHandle === `${sourceRun.name}::target::run_key`)
+                let existsEdge = flow.edges.value.find(
+                    (edge) =>
+                        edge.source === source &&
+                        edge.target === target &&
+                        edge.sourceHandle === `${sourceRun.name}::source::run_key` &&
+                        edge.targetHandle === `${sourceRun.name}::target::run_key`
+                )
                 if (existsEdge) continue
                 flow.addEdges({
                     id: guid_func(),
@@ -87,16 +94,16 @@ export function useEdgeSync() {
                     animated: true,
                     data: {
                         label: 'Key',
-                        edgeType: 'run_key',
+                        edgeType: 'run_key'
                     }
                 })
             }
         }
     }
 
-    /** 
+    /**
      * 自动连接所有算子节点的运行参数边
-     * 
+     *
      * @param {string} flowId - 流程ID，用于获取VueFlow实例
      * @param {function} guid_func - 生成唯一ID的函数
      */
@@ -111,16 +118,18 @@ export function useEdgeSync() {
         }
     }
 
-    /** 
+    /**
      * 移除算子节点的运行参数边
-     * 
+     *
      * @param {string} source - 源算子节点ID
      * @param {string} target - 目标算子节点ID
      * @param {string} flowId - 流程ID，用于获取VueFlow实例
      */
     const removeRunEdges = (source, target, flowId) => {
         const flow = useVueFlow(flowId)
-        let edges = flow.edges.value.filter((edge) => edge.source === source && edge.target === target)
+        let edges = flow.edges.value.filter(
+            (edge) => edge.source === source && edge.target === target
+        )
         for (let edge of edges) {
             flow.removeEdges([edge.id])
         }
@@ -131,6 +140,6 @@ export function useEdgeSync() {
         syncRunValue,
         autoConnectRunEdges,
         autoConnectAllRunEdges,
-        removeRunEdges,
+        removeRunEdges
     }
 }

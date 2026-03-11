@@ -1,12 +1,25 @@
 <template>
     <div class="manage-container" :class="[{ dark: theme === 'dark' }]">
         <div class="manage-content-block">
-            <fv-navigation-view :theme="theme" v-model="currentNav" :title="''" :options="navList"
-                v-model:expand="isExpand" :foreground="color"
-                :background="theme === 'dark' ? 'rgba(36, 36, 36, 1)' : ''" expand-width="300" :flyout-display="1368"
-                :mobile-display="1024" class="navigation-view" :show-back="false" :show-search="false"
-                :setting-title="local('Settings')" @item-click="handleItemClick" @setting-click="handleSettingClick"
-                @back="$Back()">
+            <fv-navigation-view
+                :theme="theme"
+                v-model="currentNav"
+                :title="''"
+                :options="navList"
+                v-model:expand="isExpand"
+                :foreground="color"
+                :background="theme === 'dark' ? 'rgba(36, 36, 36, 1)' : ''"
+                expand-width="300"
+                :flyout-display="1368"
+                :mobile-display="1024"
+                class="navigation-view"
+                :show-back="false"
+                :show-search="false"
+                :setting-title="local('Settings')"
+                @item-click="handleItemClick"
+                @setting-click="handleSettingClick"
+                @back="$Back()"
+            >
                 <template v-slot:banner>
                     <div class="title-block name">
                         <img class="nav-icon" :src="img.logo" alt="" />
@@ -15,10 +28,17 @@
                 </template>
                 <template v-slot:listItem="x">
                     <div class="nav-item" :class="{ collapse: !isExpand }">
-                        <img v-show="x.item.type !== 'header' && x.item.img" class="nav-item-icon" :src="x.item.img"
-                            alt="" />
-                        <i v-show="x.item.type !== 'header' && !x.item.img" class="ms-Icon nav-item-icon"
-                            :class="['ms-Icon--' + x.item.icon]"></i>
+                        <img
+                            v-show="x.item.type !== 'header' && x.item.img"
+                            class="nav-item-icon"
+                            :src="x.item.img"
+                            alt=""
+                        />
+                        <i
+                            v-show="x.item.type !== 'header' && !x.item.img"
+                            class="ms-Icon nav-item-icon"
+                            :class="['ms-Icon--' + x.item.icon]"
+                        ></i>
                         <p class="name" :style="{ color: x.item.type === 'header' ? color : '' }">
                             {{ x.valueTrigger(x.item.name) }}
                         </p>
@@ -45,6 +65,7 @@ import serving from '@/assets/nav/serving.svg'
 import dbManager from '@/assets/nav/dbManager.svg'
 
 export default {
+    name: 'ManageIndex',
     data() {
         return {
             currentNav: {

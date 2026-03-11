@@ -2,19 +2,38 @@
     <basePanel v-model="thisValue" :title="title" width="800px" height="80%" :theme="theme">
         <template v-slot:content>
             <div class="panel-dataset-content-wrapper">
-                <fv-pivot :theme="theme" v-model="choosenPivot" class="pivot-panel" :items="pivotItems" :tab="true"
-                    :fontSize="12" :sliderBackground="gradient" :borderRadius="8" padding="0px 5px"
-                    itemPadding="0px 10px" :sliderBorderRadius="12"></fv-pivot>
+                <fv-pivot
+                    :theme="theme"
+                    v-model="choosenPivot"
+                    class="pivot-panel"
+                    :items="pivotItems"
+                    :tab="true"
+                    :fontSize="12"
+                    :sliderBackground="gradient"
+                    :borderRadius="8"
+                    padding="0px 5px"
+                    itemPadding="0px 10px"
+                    :sliderBorderRadius="12"
+                ></fv-pivot>
                 <hr />
-                <common-dataset :model-value="choosenPivot && choosenPivot.key === 'Common'"
-                    @confirm="$emit('confirm', $event)"></common-dataset>
-                <text2sql-dataset :model-value="choosenPivot && choosenPivot.key === 'text2sql'"></text2sql-dataset>
+                <common-dataset
+                    :model-value="choosenPivot && choosenPivot.key === 'Common'"
+                    @confirm="$emit('confirm', $event)"
+                ></common-dataset>
+                <text2sql-dataset
+                    :model-value="choosenPivot && choosenPivot.key === 'text2sql'"
+                ></text2sql-dataset>
             </div>
         </template>
         <template v-slot:control="{ close }">
-            <fv-button :theme="theme" :borderRadius="8" :isBoxShadow="true" style="width: 120px; margin-right: 8px"
-                @click="close">{{
-                    local('Close') }}</fv-button>
+            <fv-button
+                :theme="theme"
+                :borderRadius="8"
+                :isBoxShadow="true"
+                style="width: 120px; margin-right: 8px"
+                @click="close"
+                >{{ local('Close') }}</fv-button
+            >
         </template>
     </basePanel>
 </template>
@@ -30,6 +49,7 @@ import commonDataset from './commonDataset/index.vue'
 import text2sqlDataset from './text2sqlDataset/index.vue'
 
 export default {
+    name: 'DatasetPanelIndex',
     components: {
         basePanel,
         commonDataset,
@@ -54,9 +74,9 @@ export default {
                 },
                 {
                     key: 'text2sql',
-                    name: () => this.local('Text2SQL'),
+                    name: () => this.local('Text2SQL')
                 }
-            ],
+            ]
         }
     },
     watch: {
@@ -74,11 +94,11 @@ export default {
     computed: {
         ...mapState(useAppConfig, ['local']),
         ...mapState(useDataflow, ['datasets']),
-        ...mapState(useTheme, ['theme', 'color', 'gradient']),
+        ...mapState(useTheme, ['theme', 'color', 'gradient'])
     },
-    mounted() { },
+    mounted() {},
     methods: {
-        ...mapActions(useDataflow, ['getDatasets', 'getText2SqlDatasets']),
+        ...mapActions(useDataflow, ['getDatasets', 'getText2SqlDatasets'])
     }
 }
 </script>

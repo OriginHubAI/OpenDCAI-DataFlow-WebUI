@@ -1,17 +1,29 @@
 <template>
-    <basePanel v-model="thisValue" :title="title" width="clamp(350px, 90%, 1600px)" height="clamp(500px, 90%, 800px)"
-        :theme="theme" :teleport="true">
+    <basePanel
+        v-model="thisValue"
+        :title="title"
+        width="clamp(350px, 90%, 1600px)"
+        height="clamp(500px, 90%, 800px)"
+        :theme="theme"
+        :teleport="true"
+    >
         <template v-slot:content>
             <div class="panel-result-content-block">
                 <div class="left-block">
                     <div v-if="runningResult" class="info-bar-block">
                         <p class="title">{{ local('Task ID') }}: {{ runningResult.task_id }}</p>
-                        <time-rounder :model-value="new Date(runningResult.completed_at)" :foreground="color"
-                            style="width: auto"></time-rounder>
+                        <time-rounder
+                            :model-value="new Date(runningResult.completed_at)"
+                            :foreground="color"
+                            style="width: auto"
+                        ></time-rounder>
                     </div>
                     <span class="title-block">{{ local('Execution Sampled Data') }}</span>
-                    <table-info :theme="theme" v-if="runningResult && runningResult.sample_data"
-                        :table-info="runningResult.sample_data"></table-info>
+                    <table-info
+                        :theme="theme"
+                        v-if="runningResult && runningResult.sample_data"
+                        :table-info="runningResult.sample_data"
+                    ></table-info>
                     <span class="title-block">{{ local('Current Step Logs') }}</span>
                     <div v-if="operatorLogs.length > 0" class="log-container step">
                         <p v-for="(item, index) in operatorLogs" :key="index" class="log-item">
@@ -20,14 +32,24 @@
                     </div>
                 </div>
                 <div class="right-block">
-                    <div v-if="runningResult && runningResult.operators_detail" class="chart-container"
-                        :class="[{ dark: theme === 'dark' }]">
+                    <div
+                        v-if="runningResult && runningResult.operators_detail"
+                        class="chart-container"
+                        :class="[{ dark: theme === 'dark' }]"
+                    >
                         <span class="title-block">{{ local('Sample Count') }}</span>
-                        <sample-chart :theme="theme" :raw-data="runningResult.operators_detail"></sample-chart>
+                        <sample-chart
+                            :theme="theme"
+                            :raw-data="runningResult.operators_detail"
+                        ></sample-chart>
                     </div>
                     <span class="title-block">{{ local('Logs') }}</span>
                     <div v-if="runningResult" class="log-container">
-                        <p v-for="(item, index) in runningResult.logs" :key="index" class="log-item">
+                        <p
+                            v-for="(item, index) in runningResult.logs"
+                            :key="index"
+                            class="log-item"
+                        >
                             {{ item }}
                         </p>
                     </div>
@@ -35,17 +57,21 @@
             </div>
         </template>
         <template v-slot:control="{ close }">
-            <fv-button :theme="theme" :borderRadius="8" :isBoxShadow="true" style="width: 120px; margin-right: 8px"
-                @click="close">{{
-                    local('Close') }}</fv-button>
+            <fv-button
+                :theme="theme"
+                :borderRadius="8"
+                :isBoxShadow="true"
+                style="width: 120px; margin-right: 8px"
+                @click="close"
+                >{{ local('Close') }}</fv-button
+            >
         </template>
     </basePanel>
 </template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
+import { mapState } from 'pinia'
 import { useAppConfig } from '@/stores/appConfig'
-import { useDataflow } from '@/stores/dataflow'
 import { useTheme } from '@/stores/theme'
 
 import basePanel from '@/components/general/basePanel.vue'
@@ -54,11 +80,12 @@ import tableInfo from './preview/tableInfo.vue'
 import sampleChart from './preview/sampleChart.vue'
 
 export default {
+    name: 'ExecResultPanelIndex',
     components: {
         basePanel,
         timeRounder,
         tableInfo,
-        sampleChart,
+        sampleChart
     },
     props: {
         modelValue: {
@@ -102,13 +129,13 @@ export default {
         },
         operatorLogs() {
             try {
-                let _step = this.runningResult.operator_logs.length - 1;
+                let _step = this.runningResult.operator_logs.length - 1
                 if (this.currentStep !== null) _step = this.currentStep
-                let operatorLogs = this.runningResult.operator_logs;
+                let operatorLogs = this.runningResult.operator_logs
                 for (let key in operatorLogs) {
-                    let step = parseInt(key.split('_')[1]);
+                    let step = parseInt(key.split('_')[1])
                     if (step == _step) {
-                        return operatorLogs[key];
+                        return operatorLogs[key]
                     }
                 }
                 return []
@@ -117,8 +144,7 @@ export default {
             }
         }
     },
-    mounted() {
-    },
+    mounted() {},
     methods: {}
 }
 </script>

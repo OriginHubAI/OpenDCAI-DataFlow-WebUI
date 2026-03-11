@@ -1,21 +1,51 @@
 <template>
     <div v-show="thisValue" class="panel-dataset-content-block">
-        <fv-Collapse :theme="theme" v-model="show.add" class="db-add-item" icon="Marquee" :title="local('Add Database')"
-            :content="local('Add new Text2SQL database information.')" :disabled-collapse="true" :max-height="'auto'">
+        <fv-Collapse
+            :theme="theme"
+            v-model="show.add"
+            class="db-add-item"
+            icon="Marquee"
+            :title="local('Add Database')"
+            :content="local('Add new Text2SQL database information.')"
+            :disabled-collapse="true"
+            :max-height="'auto'"
+        >
             <template v-slot:icon>
-                <fv-img :src="img.database" style="width: auto; height: 30px; margin: 0px 5px"></fv-img>
+                <fv-img
+                    :src="img.database"
+                    style="width: auto; height: 30px; margin: 0px 5px"
+                ></fv-img>
             </template>
             <template v-slot:extension>
-                <fv-button v-show="show.add" theme="dark" :is-box-shadow="true" :background="gradient"
-                    :disabled="!lock.add || !checkAdd()" border-radius="6" style="width: 90px; margin-right: 5px"
-                    @click="confirmAdd">
-                    <fv-progress-ring v-model="progress" v-show="progress > 0 && (!lock.add || !checkAdd())" :r="10"
-                        :border-width="2" background="rgba(200, 200, 200, 1)" :color="'white'"
-                        style="margin-right: 5px"></fv-progress-ring>
+                <fv-button
+                    v-show="show.add"
+                    theme="dark"
+                    :is-box-shadow="true"
+                    :background="gradient"
+                    :disabled="!lock.add || !checkAdd()"
+                    border-radius="6"
+                    style="width: 90px; margin-right: 5px"
+                    @click="confirmAdd"
+                >
+                    <fv-progress-ring
+                        v-model="progress"
+                        v-show="progress > 0 && (!lock.add || !checkAdd())"
+                        :r="10"
+                        :border-width="2"
+                        background="rgba(200, 200, 200, 1)"
+                        :color="'white'"
+                        style="margin-right: 5px"
+                    ></fv-progress-ring>
                     {{ local('Confirm') }}
                 </fv-button>
-                <fv-button :theme="show.add ? theme : 'dark'" :is-box-shadow="true"
-                    :background="show.add ? '' : gradient" border-radius="6" style="width: 90px" @click="handleAdd">
+                <fv-button
+                    :theme="show.add ? theme : 'dark'"
+                    :is-box-shadow="true"
+                    :background="show.add ? '' : gradient"
+                    border-radius="6"
+                    style="width: 90px"
+                    @click="handleAdd"
+                >
                     {{ show.add ? local('Cancel') : local('Add') }}
                 </fv-button>
             </template>
@@ -23,39 +53,81 @@
                 <div class="db-add-item-row column">
                     <p class="db-add-item-light-title">{{ local('File') }}</p>
                     <div class="db-add-item-row no-pad">
-                        <fv-button theme="dark" icon="Add" :is-box-shadow="true" :background="gradient"
-                            border-radius="6" style="width: 90px" @click="handleAddFile">
+                        <fv-button
+                            theme="dark"
+                            icon="Add"
+                            :is-box-shadow="true"
+                            :background="gradient"
+                            border-radius="6"
+                            style="width: 90px"
+                            @click="handleAddFile"
+                        >
                             {{ local('Add File') }}
                         </fv-button>
-                        <p v-show="filePath" class="db-add-item-info" style="margin-left: 15px;">{{ filePath }}</p>
+                        <p v-show="filePath" class="db-add-item-info" style="margin-left: 15px">
+                            {{ filePath }}
+                        </p>
                     </div>
-                    <input type="file" style="display: none" ref="fileInput" accept=".db,.sqlite">
+                    <input type="file" style="display: none" ref="fileInput" accept=".db,.sqlite" />
                 </div>
                 <hr />
                 <div class="db-add-item-row column">
                     <p class="db-add-item-light-title">{{ local('Database Name') }}</p>
-                    <fv-text-box :theme="theme" v-model="databaseName" :placeholder="local('Database Name')"
-                        border-radius="6" :reveal-border="true" :is-box-shadow="true"></fv-text-box>
+                    <fv-text-box
+                        :theme="theme"
+                        v-model="databaseName"
+                        :placeholder="local('Database Name')"
+                        border-radius="6"
+                        :reveal-border="true"
+                        :is-box-shadow="true"
+                    ></fv-text-box>
                 </div>
                 <hr />
                 <div class="db-add-item-row column">
                     <p class="db-add-item-light-title">{{ local('Description') }}</p>
-                    <fv-text-box :theme="theme" v-model="databaseDescription" :placeholder="local('Description')"
-                        border-radius="6" :reveal-border="true" :is-box-shadow="true"></fv-text-box>
+                    <fv-text-box
+                        :theme="theme"
+                        v-model="databaseDescription"
+                        :placeholder="local('Description')"
+                        border-radius="6"
+                        :reveal-border="true"
+                        :is-box-shadow="true"
+                    ></fv-text-box>
                 </div>
             </template>
         </fv-Collapse>
-        <fv-Collapse :theme="theme" v-model="item.expanded" v-for="(item, index) in text2sqlDatasets" :key="index"
-            class="dataset-item" :title="item.name" :content="computeInfo(item)"
-            :maxHeight="item.showPreview ? 690 : 380" background="rgba(251, 251, 251, 1)">
+        <fv-Collapse
+            :theme="theme"
+            v-model="item.expanded"
+            v-for="(item, index) in text2sqlDatasets"
+            :key="index"
+            class="dataset-item"
+            :title="item.name"
+            :content="computeInfo(item)"
+            :maxHeight="item.showPreview ? 690 : 380"
+            background="rgba(251, 251, 251, 1)"
+        >
             <template v-slot:icon>
-                <fv-img :src="img.database" style="width: auto; height: 30px; margin: 0px 5px"></fv-img>
+                <fv-img
+                    :src="img.database"
+                    style="width: auto; height: 30px; margin: 0px 5px"
+                ></fv-img>
             </template>
             <data-info v-if="!item.showPreview" :item="item"></data-info>
-            <table-info v-if="item.showPreview" :item="item" @back="item.showPreview = false"></table-info>
+            <table-info
+                v-if="item.showPreview"
+                :item="item"
+                @back="item.showPreview = false"
+            ></table-info>
             <template v-slot:extension>
-                <fv-button theme="dark" icon="Delete" :background="'rgba(200, 38, 45, 1)'" :borderRadius="8"
-                    :isBoxShadow="true" @click="confirmDelete($event, item)">{{ local('Delete') }}
+                <fv-button
+                    theme="dark"
+                    icon="Delete"
+                    :background="'rgba(200, 38, 45, 1)'"
+                    :borderRadius="8"
+                    :isBoxShadow="true"
+                    @click="confirmDelete($event, item)"
+                    >{{ local('Delete') }}
                 </fv-button>
             </template>
         </fv-Collapse>
@@ -74,6 +146,7 @@ import tableInfo from '../preview/tableInfo.vue'
 import databaseIcon from '@/assets/flow/database.svg'
 
 export default {
+    name: 'Text2SqlDatasetIndex',
     components: {
         dataInfo,
         tableInfo
@@ -130,7 +203,6 @@ export default {
             })
         },
         handleFileChange(event) {
-
             const file = event.target.files[0]
             if (file) {
                 this.filePath = file.name
@@ -149,7 +221,11 @@ export default {
             this.$refs.fileInput.click()
         },
         checkAdd() {
-            if (this.databaseName === '' || this.databaseDescription === '' || this.filePath === '') {
+            if (
+                this.databaseName === '' ||
+                this.databaseDescription === '' ||
+                this.filePath === ''
+            ) {
                 return false
             }
             return true
@@ -169,27 +245,33 @@ export default {
                 return
             }
             this.lock.add = false
-            this.$api.text2sql_database.upload_sqlite_database({
-                name: this.databaseName,
-                description: this.databaseDescription,
-                file: this.$refs.fileInput.files[0]
-            }, null, (event) => {
-                this.progress = event.loaded / event.total * 100
-            }).then((res) => {
-                if (res.code === 200) {
-                    this.$barWarning(this.local('Add Database Success'), {
-                        status: 'correct'
-                    })
-                    this.handleAdd()
-                    this.getText2SqlDatasets()
-                    this.progress = 0
-                } else {
-                    this.$barWarning(this.local('Add Database Failed') + ': ' + res.message, {
-                        status: 'warning'
-                    })
-                }
-                this.lock.add = true
-            })
+            this.$api.text2sql_database
+                .upload_sqlite_database(
+                    {
+                        name: this.databaseName,
+                        description: this.databaseDescription,
+                        file: this.$refs.fileInput.files[0]
+                    },
+                    null,
+                    (event) => {
+                        this.progress = (event.loaded / event.total) * 100
+                    }
+                )
+                .then((res) => {
+                    if (res.code === 200) {
+                        this.$barWarning(this.local('Add Database Success'), {
+                            status: 'correct'
+                        })
+                        this.handleAdd()
+                        this.getText2SqlDatasets()
+                        this.progress = 0
+                    } else {
+                        this.$barWarning(this.local('Add Database Failed') + ': ' + res.message, {
+                            status: 'warning'
+                        })
+                    }
+                    this.lock.add = true
+                })
         },
         confirmDelete(event, item) {
             event.stopPropagation()
@@ -204,9 +286,12 @@ export default {
                             })
                             this.getText2SqlDatasets()
                         } else {
-                            this.$barWarning(this.local('Delete Database Failed') + ': ' + res.message, {
-                                status: 'warning'
-                            })
+                            this.$barWarning(
+                                this.local('Delete Database Failed') + ': ' + res.message,
+                                {
+                                    status: 'warning'
+                                }
+                            )
                         }
                     })
                 }
