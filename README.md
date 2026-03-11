@@ -105,6 +105,22 @@ pip install -r backend/requirements.txt
 
 ---
 
+## Environment Variables (Optional)
+
+The project supports optional environment variables to override default configurations. A `.env.example` file is provided in the repository root as a template. You can copy it to `.env` or set these variables in your environment.
+
+### Frontend
+- **`VITE_BACKEND_URL`**: Base URL for API requests in production. Defaults to `/`.
+
+### Backend
+Backend settings are managed by Pydantic and can be overridden by environment variables:
+- **`ENV`**: Environment mode (default: `dev`).
+- **`CORS_ORIGINS`**: Allowed CORS origins (e.g., `["http://localhost"]`).
+- **Path Configurations**: You can override default data and cache paths (`DATA_REGISTRY`, `CACHE_DIR`, etc.). See `.env.example` for the full list.
+- **Dynamic Variables**: API keys (like OpenAI or Hugging Face tokens) are dynamically injected at runtime during pipeline execution based on the user payload or registry configuration.
+
+---
+
 ## Running the Project
 
 ### 1. Build the frontend
@@ -117,23 +133,24 @@ npm run build
 
 This will generate the production-ready frontend assets.
 
-### 2. Start the backend server
+### 2. Start the application
 
-```shell
-cd backend/
-```
+You can use the provided startup scripts from the root directory:
 
 * **On Linux / macOS:**
 
 ```shell
-make dev
+chmod +x start.sh
+./start.sh
 ```
 
 * **On Windows:**
 
 ```shell
-uvicorn app.main:app --reload --port 8000 --reload-dir app --host 0.0.0.0
+./start.bat
 ```
+
+> 💡 These scripts will load configuration from a `.env` file if it exists. By default, the application runs on port `8000`.
 
 ---
 

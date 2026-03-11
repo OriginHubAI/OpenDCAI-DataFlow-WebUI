@@ -1,0 +1,44 @@
+{
+  "id": "doc-env-vars",
+  "name": "doc-env-vars",
+  "title": "Document Environment Variables",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "priority": "P2",
+  "creator": "linpengt",
+  "assignee": "linpengt",
+  "createdAt": "2026-03-11",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "linpengt/dev",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

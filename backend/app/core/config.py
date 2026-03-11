@@ -5,6 +5,7 @@ import os
 class Settings(BaseSettings):
     # 基本
     ENV: str = "dev"
+    PORT: int = 8000
     CORS_ORIGINS:list[str] = [
         # "http://127.0.0.1:60081",
         # "http://localhost:60081",
