@@ -20,7 +20,7 @@ def test_registry():
     temp_files = []
     
     # 创建测试用的registry实例
-    registry = DatasetRegistry(TEST_REGISTRY_PATH)
+    registry = DatasetRegistry(TEST_REGISTRY_PATH, scan=False)
     
     # 创建临时数据集文件并添加到registry
     for i in range(5):

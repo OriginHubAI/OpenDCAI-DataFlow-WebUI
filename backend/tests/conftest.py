@@ -5,6 +5,14 @@ pytest 配置文件
 import os
 import pytest
 from app.services.task_registry import TaskRegistry
+from app.core.container import container
+
+
+@pytest.fixture(scope="session", autouse=True)
+def initialize_container():
+    """在所有测试开始前初始化 container 单例"""
+    container.init()
+    return container
 
 
 @pytest.fixture

@@ -436,26 +436,25 @@ def test_engine_database_manager_injection_supports_manager_id_and_list(client: 
                 }
             ],
         },
-        execution_id="exec1",
+        task_id="exec1",
     )
 
     # 4) Run engine with database_manager == list[db_id]
     engine.run(
-        {
-            "input_dataset": "ds1",
-            "operators": [
-                {
-                    "name": "DummyOp",
-                    "params": {
-                        "init": [{"name": "database_manager", "value": [db1, db2]}],
-                        "run": [],
-                    },
-                }
-            ],
-        },
-        execution_id="exec2",
+    {
+        "input_dataset": "ds1",
+        "operators": [
+            {
+                "name": "DummyOp",
+                "params": {
+                    "init": [{"name": "database_manager", "value": [db1, db2]}],
+                    "run": [],
+                },
+            }
+        ],
+    },
+    task_id="exec2",
     )
-
     assert observed_db_sets[0] == {db1, db3}
     assert observed_db_sets[1] == {db1, db2}
 
@@ -502,7 +501,7 @@ def test_engine_database_manager_missing_manager_id_raises(client: TestClient, m
                 }
             ],
         },
-        execution_id="exec_missing_mgr",
+        task_id="exec_missing_mgr",
     )
     assert result["status"] == "failed"
     assert "database_manager config not found" in str(result["output"].get("original_error", ""))
@@ -557,7 +556,7 @@ def test_engine_database_manager_none_uses_all(client: TestClient, tmp_path: Pat
                 }
             ],
         },
-        execution_id="exec_none_mgr",
+        task_id="exec_none_mgr",
     )
 
     assert {db1, db2}.issubset(observed[0])
@@ -617,7 +616,7 @@ def test_engine_database_manager_caches_instances_for_repeated_values(client: Te
                 {"name": "DummyOp", "params": {"init": [{"name": "database_manager", "value": ["x", "y"]}], "run": []}},
             ],
         },
-        execution_id="exec_cache",
+        task_id="exec_cache",
     )
 
     assert call_count["n"] == 1
