@@ -173,6 +173,13 @@ class DatasetRegistry:
         # 计算一个稳定 id（基于路径）
         ds_id = hashlib.md5(ds["root"].encode("utf-8")).hexdigest()[:10]
         ds["id"] = ds_id
+        
+        # 支持 V2 spec 字段
+        if "namespace" not in ds:
+            ds["namespace"] = "local"
+        if "repo_id" not in ds:
+            ds["repo_id"] = f"{ds['namespace']}/{ds.get('name', ds_id)}"
+            
         try: 
             ds["hash"] = self._load_file_hash(ds["root"])
             
@@ -188,6 +195,17 @@ class DatasetRegistry:
         ds['type'] = ds.get('root','').split('.')[-1].lower()
         ds["added_at"] = pd.Timestamp.now().isoformat()
         
+        # 初始化 features 和 splits
+        if "features" not in ds:
+            ds["features"] = {}
+        if "splits" not in ds:
+            ds["splits"] = {
+                "default": {
+                    "num_examples": ds.get("num_samples", 0),
+                    "file_path": ds.get("root", "")
+                }
+            }
+        
         # 覆盖或新增
         datasets = data.get("datasets",{})
         datasets[ds_id] = ds
@@ -197,6 +215,14 @@ class DatasetRegistry:
 
     def get(self, ds_id: str) -> Dict | None:
         return self._read()["datasets"].get(ds_id)
+        
+    def get_by_repo_id(self, repo_id: str) -> Dict | None:
+        datasets = self._read()["datasets"].values()
+        for ds in datasets:
+            if ds.get("repo_id") == repo_id:
+                return ds
+        return None
+
     
     def remove(self, ds_id: str):
         data = self._read()
