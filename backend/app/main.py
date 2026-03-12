@@ -25,7 +25,8 @@ def create_app() -> FastAPI:
     container.init()
     app = FastAPI(title="DataFlow Backend", version="1.0.0")
     app.include_router(api_v1, prefix="/api/v1")
-    app.include_router(api_hf, prefix="/api/hf")
+    if settings.ENABLE_HF_API:
+        app.include_router(api_hf, prefix="/api/hf")
     app.add_middleware(
         CORSMiddleware,
         # allow_origins=settings.CORS_ORIGINS,

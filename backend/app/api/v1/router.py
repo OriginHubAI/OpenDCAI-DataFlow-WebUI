@@ -8,9 +8,11 @@ from .endpoints import prompts
 from .endpoints import serving
 from .endpoints import text2sql_database
 from .endpoints import preferences
+from app.core.config import settings
 api_router = APIRouter()
 # api_router.include_router(health.router, prefix="/health")
-api_router.include_router(datasets.router, prefix="/datasets")
+if settings.ENABLE_DATASETS_API:
+    api_router.include_router(datasets.router, prefix="/datasets")
 api_router.include_router(operators.router, prefix="/operators")
 api_router.include_router(tasks.router, prefix="/tasks")
 api_router.include_router(pipelines.router, prefix="/pipelines")

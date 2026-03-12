@@ -116,6 +116,8 @@ The project supports optional environment variables to override default configur
 Backend settings are managed by Pydantic and can be overridden by environment variables:
 - **`ENV`**: Environment mode (default: `dev`).
 - **`CORS_ORIGINS`**: Allowed CORS origins (e.g., `["http://localhost"]`).
+- **`ENABLE_DATASETS_API`**: Enable/disable the datasets API (default: `true`).
+- **`ENABLE_HF_API`**: Enable/disable the Hugging Face compatibility API (default: `true`).
 - **Path Configurations**: You can override default data and cache paths (`DATA_REGISTRY`, `CACHE_DIR`, etc.). See `.env.example` for the full list.
 - **Dynamic Variables**: API keys (like OpenAI or Hugging Face tokens) are dynamically injected at runtime during pipeline execution based on the user payload or registry configuration.
 

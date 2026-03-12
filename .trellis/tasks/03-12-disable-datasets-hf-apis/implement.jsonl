@@ -1,0 +1,4 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend development guide"}
+{"file": ".trellis/spec/backend/dataset-api-guidelines.md", "reason": "Reference for datasets API"}
+{"file": ".trellis/spec/backend/datasets-v2-api-spec.md", "reason": "Reference for HF API (V2)"}

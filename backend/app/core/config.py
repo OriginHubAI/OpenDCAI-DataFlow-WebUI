@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     SQLITE_DB_DIR: str = os.path.join(BASE_DIR, "data", "text2sql_dbs") # where sqlite database files are stored
     CACHE_DIR: str = os.path.join(BASE_DIR, "cache_local") # cache directory for pipeline execution
     DEFAULT_SERVING_FILLING: bool = True # whether to fill default values for missing fields in serving
+    ENABLE_DATASETS_API: bool = True # whether to enable datasets API
+    ENABLE_HF_API: bool = True # whether to enable HF API
 
     # white list of preset pipelines that can be shown in the frontend pipeline template list
     _PRESET_PIPELINE_NAME_WHITELIST = {
