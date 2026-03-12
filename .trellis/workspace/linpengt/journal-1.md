@@ -199,3 +199,35 @@ Addressed all ESLint errors and warnings in the frontend codebase. Verified that
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: Add Env Vars to Toggle Datasets and HF APIs
+
+**Date**: 2026-03-12
+**Task**: Add Env Vars to Toggle Datasets and HF APIs
+
+### Summary
+
+Added ENABLE_DATASETS_API and ENABLE_HF_API environment variables to backend configuration. Updated main and v1 routers to conditionally include datasets and HF API endpoints based on these settings. Documented in README.md and .env.example.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3795316` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

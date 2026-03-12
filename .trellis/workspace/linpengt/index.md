@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 6
+- **Total Sessions**: 7
 - **Last Active**: 2026-03-12
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~201 | Active |
+| `journal-1.md` | ~233 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits |
 |---|------|-------|---------|
+| 7 | 2026-03-12 | Add Env Vars to Toggle Datasets and HF APIs | `3795316` |
 | 6 | 2026-03-12 | Finalize Frontend Lint Fixes | `22efebf` |
 | 5 | 2026-03-12 | Finalize Environment Variables Documentation | `6c4fbff` |
 | 4 | 2026-03-12 | Finalize Dataset API Analysis | `d6bf5b2` |
