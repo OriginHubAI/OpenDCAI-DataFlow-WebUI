@@ -1,0 +1,7 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend development guide"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend development guide"}
+{"file": "backend/app/core/config.py", "reason": "Config pattern"}
+{"file": "frontend/vite.config.js", "reason": "Proxy configuration"}
+{"file": "frontend/src/axios/config.js", "reason": "Axios base configuration"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Cross-layer guidelines"}
