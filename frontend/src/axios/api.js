@@ -10,7 +10,7 @@ const CancelTokenSource = Axios.CancelTokenSource
 export class datasets {
     /**
      * @summary 返回目前所有注册的数据集列表，包含每个数据集的条目数和文件大小
-     * @param {CancelTokenSource} [cancelSource] Axios Cancel Source 对象，可以取消该请求
+     * @param {CancelTokenSource} [cancelSource] Axios Cancel Source 对象，可 以取消该请求
      * @param {Function} [uploadProgress] 上传回调函数
      * @param {Function} [downloadProgress] 下载回调函数
      */
@@ -19,7 +19,7 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/',
+                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/datasets' : '/api/v1/datasets/',
                 data: {},
                 params: {},
                 headers: {
@@ -44,8 +44,14 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        // Compatibility layer: HF endpoint returns direct array, v1 returns { success, data: [] } wrapper
+                        if (import.meta.env.VITE_USE_HF_ENDPOINT === 'true') {
+                            resolve({ success: true, code: 200, data: res.data })
+                            return { success: true, code: 200, data: res.data }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -71,8 +77,8 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/datasets/',
-                data: datasetin,
+                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/repos/create' : '/api/v1/datasets/',
+                data: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? { name: datasetin.name, type: 'dataset' } : datasetin,
                 params: {},
                 headers: {
                     'Content-Type': 'application/json'
@@ -96,8 +102,13 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (import.meta.env.VITE_USE_HF_ENDPOINT === 'true') {
+                            resolve({ success: true, code: 200, data: res.data })
+                            return { success: true, code: 200, data: res.data }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -173,9 +184,11 @@ export class datasets {
     static async get_dataset(pathds_id, cancelSource, uploadProgress, downloadProgress) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
+            // For HF, dataset ID is the repo_id e.g. "local/my-dataset"
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/' + pathds_id + '',
+                url: isHF ? '/api/hf/api/datasets/' + pathds_id + '' : '/api/v1/datasets/' + pathds_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -200,8 +213,13 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            resolve({ success: true, code: 200, data: res.data })
+                            return { success: true, code: 200, data: res.data }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -225,13 +243,14 @@ export class datasets {
     static async delete_dataset(pathds_id, cancelSource, uploadProgress, downloadProgress) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'delete',
-                url: '/api/v1/datasets/' + pathds_id + '',
-                data: {},
+                url: isHF ? '/api/hf/api/repos/delete' : '/api/v1/datasets/' + pathds_id + '',
+                data: isHF ? { name: pathds_id.split('/').pop() || pathds_id, type: 'dataset' } : {},
                 params: {},
                 headers: {
-                    'Content-Type': ''
+                    'Content-Type': isHF ? 'application/json' : ''
                 },
                 onUploadProgress: uploadProgress,
                 onDownloadProgress: downloadProgress
@@ -252,8 +271,13 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            resolve({ success: true, code: 200, data: res.data })
+                            return { success: true, code: 200, data: res.data }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -286,11 +310,12 @@ export class datasets {
     ) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/pandas_type_sample/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/file_type_sample/' + pathds_id + '',
                 data: {},
-                params: { start, end },
+                params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: start || 0, length: end ? end - (start || 0) : 5 } : { start, end },
                 headers: {
                     'Content-Type': ''
                 },
@@ -313,8 +338,16 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            let mapped_data = res.data.rows.map(r => r.row)
+                            // return as JSON string to match backend format of v1 pandas_type_sample
+                            let data_str = JSON.stringify(mapped_data)
+                            resolve({ success: true, code: 200, data: data_str })
+                            return { success: true, code: 200, data: data_str }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -338,11 +371,12 @@ export class datasets {
     static async get_file_type_data(pathds_id, cancelSource, uploadProgress, downloadProgress) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/file_type_sample/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/file_type_sample/' + pathds_id + '',
                 data: {},
-                params: {},
+                params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: 0, length: 1 } : {},
                 headers: {
                     'Content-Type': ''
                 },
@@ -365,8 +399,15 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            let mapped_data = res.data.rows.map(r => r.row)
+                            let data_str = JSON.stringify(mapped_data)
+                            resolve({ success: true, code: 200, data: data_str })
+                            return { success: true, code: 200, data: data_str }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -397,11 +438,12 @@ export class datasets {
     ) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/preview/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/preview/' + pathds_id + '',
                 data: {},
-                params: { num_lines },
+                params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: 0, length: num_lines } : { num_lines },
                 headers: {
                     'Content-Type': ''
                 },
@@ -424,8 +466,14 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            let mapped_data = res.data.rows.map(r => r.row)
+                            resolve({ success: true, code: 200, data: mapped_data })
+                            return { success: true, code: 200, data: mapped_data }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
@@ -449,11 +497,12 @@ export class datasets {
     static async get_dataset_columns(pathds_id, cancelSource, uploadProgress, downloadProgress) {
         return await new Promise((resolve, reject) => {
             let responseType = 'json'
+            let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/columns/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/info' : '/api/v1/datasets/columns/' + pathds_id + '',
                 data: {},
-                params: {},
+                params: isHF ? { dataset: pathds_id, config: "default" } : {},
                 headers: {
                     'Content-Type': ''
                 },
@@ -476,8 +525,14 @@ export class datasets {
                             })
                         )
                     } else {
-                        resolve(res.data)
-                        return res.data
+                        if (isHF) {
+                            let features = res.data.dataset_info?.features || {}
+                            resolve({ success: true, code: 200, data: Object.keys(features) })
+                            return { success: true, code: 200, data: Object.keys(features) }
+                        } else {
+                            resolve(res.data)
+                            return res.data
+                        }
                     }
                 })
                 .catch((err) => {
