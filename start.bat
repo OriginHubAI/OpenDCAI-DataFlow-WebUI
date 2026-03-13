@@ -19,10 +19,10 @@ if not exist frontend\dist (
     cd ..
 )
 
-:: Start Backend (Uvicorn)
+:: Start Backend
 echo Starting DataFlow-WebUI on port %PORT%...
 cd backend
-uvicorn app.main:app --host 0.0.0.0 --port %PORT% --reload-dir app --reload
+python run_server.py
 cd ..
 
 endlocal

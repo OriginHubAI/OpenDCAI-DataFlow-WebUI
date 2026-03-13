@@ -11,9 +11,24 @@ if (import.meta.env.MODE == 'production') {
 
 ax.interceptors.request.use(
     (config) => {
+        // Route HF API requests to a different port if needed
+        if (config.url && config.url.startsWith('/api/hf')) {
+            const hfPort = import.meta.env.VITE_HF_API_PORT;
+            if (hfPort) {
+                // Determine current location to rewrite the URL correctly
+                const currentProtocol = window.location.protocol;
+                const currentHostname = window.location.hostname;
+                // Only overwrite if we need to hit a different port
+                if (window.location.port !== String(hfPort)) {
+                    config.baseURL = `${currentProtocol}//${currentHostname}:${hfPort}`;
+                }
+            }
+        }
+
         if (
+            config.headers['Content-Type'] && (
             config.headers['Content-Type'].includes('x-www-form-urlencoded') ||
-            config.headers['Content-Type'].includes('multipart/form-data')
+            config.headers['Content-Type'].includes('multipart/form-data'))
         ) {
             let formData = new FormData()
             for (let item in config.data) {

@@ -15,6 +15,8 @@ if [ ! -d "frontend/dist" ]; then
     (cd frontend && npm install && npm run build)
 fi
 
-# Start Backend (Uvicorn)
+# Start Backend
 echo "Starting DataFlow-WebUI on port $PORT..."
-cd backend && uvicorn app.main:app --host 0.0.0.0 --port "$PORT" --reload-dir app --reload
+export PORT
+export HF_API_PORT
+cd backend && python run_server.py

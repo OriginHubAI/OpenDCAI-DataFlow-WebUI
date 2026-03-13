@@ -35,10 +35,12 @@ class AppContainer:
                 print(f"Failed to load DataFlow extension '{ext}': {e}")
         # 检查是否在 Ray worker 中运行
         import ray
+        import os
         is_ray_worker = ray.is_initialized() and ray.get_runtime_context().worker.mode != 0
+        is_hf_api = os.environ.get("DATAFLOW_HF_API_MODE") == "1"
 
         # 初始化顺序在这里完全由你控制
-        self.dataset_registry = DatasetRegistry(scan=not is_ray_worker)
+        self.dataset_registry = DatasetRegistry(scan=not is_ray_worker and not is_hf_api)
         self.dataset_visualize_service = VisualizeDatasetService()
         self.operator_registry = OperatorRegistry()
         self.prompt_registry = PromptRegistry()

@@ -21,16 +21,25 @@ INDEX_FILE = DIST_DIR / "index.html"
 
 
 def create_app() -> FastAPI:
+    import os
     setup_dataflow_core()
     container.init()
     app = FastAPI(title="DataFlow Backend", version="1.0.0")
-    app.include_router(api_v1, prefix="/api/v1")
+    
+    is_hf_api_mode = os.environ.get("DATAFLOW_HF_API_MODE") == "1"
+    
+    if not is_hf_api_mode:
+        app.include_router(api_v1, prefix="/api/v1")
+        
     if settings.ENABLE_HF_API:
-        app.include_router(api_hf, prefix="/api/hf")
+        if settings.HF_API_PORT != settings.PORT:
+            if is_hf_api_mode:
+                app.include_router(api_hf, prefix="/api/hf")
+        else:
+            app.include_router(api_hf, prefix="/api/hf")
     app.add_middleware(
         CORSMiddleware,
-        # allow_origins=settings.CORS_ORIGINS,
-        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+        allow_origin_regex=r"https?://.*",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

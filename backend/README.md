@@ -14,5 +14,5 @@ Start backend serving:
 make dev
 
 # Otherwise, use this command directly. 
-uvicorn app.main:app --reload --port 8000  --reload-dir app --host=0.0.0.0
+python run_server.py
 ```
