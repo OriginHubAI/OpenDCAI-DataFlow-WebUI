@@ -40,8 +40,8 @@ class AppContainer:
         is_hf_api = os.environ.get("DATAFLOW_HF_API_MODE") == "1"
 
         # 初始化顺序在这里完全由你控制
-        self.dataset_registry = DatasetRegistry(scan=not is_ray_worker and not is_hf_api)
-        self.dataset_visualize_service = VisualizeDatasetService()
+        self.dataset_registry = DatasetRegistry(scan=not is_ray_worker and not is_hf_api) if settings.ENABLE_DATASETS_API else None
+        self.dataset_visualize_service = VisualizeDatasetService() if settings.ENABLE_DATASETS_API else None
         self.operator_registry = OperatorRegistry()
         self.prompt_registry = PromptRegistry()
         self.serving_registry = ServingRegistry()

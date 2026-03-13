@@ -28,15 +28,20 @@ def create_app() -> FastAPI:
     
     is_hf_api_mode = os.environ.get("DATAFLOW_HF_API_MODE") == "1"
     
+    # Register V1 API only in normal mode
     if not is_hf_api_mode:
         app.include_router(api_v1, prefix="/api/v1")
         
+    # Register HF API if enabled
     if settings.ENABLE_HF_API:
+        # If separate ports are used, only register in HF mode
         if settings.HF_API_PORT != settings.PORT:
             if is_hf_api_mode:
                 app.include_router(api_hf, prefix="/api/hf")
         else:
+            # If same port is used, always register
             app.include_router(api_hf, prefix="/api/hf")
+    
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=r"https?://.*",

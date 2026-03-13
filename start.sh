@@ -19,4 +19,4 @@ fi
 echo "Starting DataFlow-WebUI on port $PORT..."
 export PORT
 export HF_API_PORT
-cd backend && python run_server.py
+cd backend && python run_server.py "$@"

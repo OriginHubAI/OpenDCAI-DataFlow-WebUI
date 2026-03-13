@@ -3,4 +3,5 @@ __pycache__
 dist_release/
 
 .env
+.env.embedded
 .vscode

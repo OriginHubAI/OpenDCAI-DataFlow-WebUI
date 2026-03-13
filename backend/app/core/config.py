@@ -1,13 +1,19 @@
 import os
-from pydantic_settings import BaseSettings
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file_encoding='utf-8',
+        extra='ignore'
+    )
+
     # 基本
     ENV: str = "dev"
     PORT: int = 8000
     HF_API_PORT: int = 8000
-    CORS_ORIGINS:list[str] = [
+    CORS_ORIGINS: list[str] = [
         # "http://127.0.0.1:60081",
         # "http://localhost:60081",
         # "http://127.0.0.1:60082",
@@ -16,9 +22,8 @@ class Settings(BaseSettings):
         # "http://127.0.0.1",
         # # "*"
     ]
-    
-    # 获取项目根目录
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    BASE_DIR: str = _BASE_DIR
     
     DATA_REGISTRY: str = os.path.join(BASE_DIR, "data", "data_registry.yaml") #
     TASK_REGISTRY: str = os.path.join(BASE_DIR, "data", "task_registry.json")

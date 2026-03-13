@@ -1,4 +1,4 @@
-import yaml, os, hashlib
+import yaml, os, hashlib, tempfile
 import json
 from typing import Dict, List
 from app.core.config import settings
@@ -123,8 +123,11 @@ class DatasetRegistry:
             return yaml.safe_load(f) or {"datasets": {}}
 
     def _write(self, data: Dict):
-        with open(self.path, "w", encoding="utf-8") as f:
-            yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+        dir_ = os.path.dirname(self.path)
+        with tempfile.NamedTemporaryFile("w", dir=dir_, delete=False, encoding="utf-8", suffix=".tmp") as tmp:
+            yaml.safe_dump(data, tmp, allow_unicode=True, sort_keys=False)
+            tmp_path = tmp.name
+        os.replace(tmp_path, self.path)
 
     def _count_file_entries(self, file_path: str) -> int:
         """统计文件中的条目数量"""
