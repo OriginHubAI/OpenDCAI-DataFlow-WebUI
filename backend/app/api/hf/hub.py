@@ -6,9 +6,28 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.core.container import container
+from app.core.config import settings
 from app.schemas.dataset import DatasetOut
 
 router = APIRouter(tags=["hf-hub"])
+
+
+def _proxy_get(path: str, params: dict = None):
+    """Proxy a GET request to EXTERNAL_HF_API_URL. Raises HTTPException on failure."""
+    if not settings.EXTERNAL_HF_API_URL:
+        raise HTTPException(503, "Dataset registry is disabled and EXTERNAL_HF_API_URL is not configured")
+    import httpx
+    url = settings.EXTERNAL_HF_API_URL.rstrip("/") + "/" + path.lstrip("/")
+    try:
+        resp = httpx.get(url, params={k: v for k, v in (params or {}).items() if v is not None}, timeout=30)
+        if resp.status_code == 404:
+            raise HTTPException(404, resp.text)
+        resp.raise_for_status()
+        return resp.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(502, f"External HF API request failed: {e}")
 
 class CreateRepoRequest(BaseModel):
     name: str
@@ -30,6 +49,9 @@ def list_datasets(
     limit: Optional[int] = Query(100, ge=1),
     full: Optional[bool] = False,
 ):
+    if container.dataset_registry is None:
+        return _proxy_get("/api/datasets", {"author": author, "search": search, "sort": sort,
+                                            "direction": direction, "limit": limit, "full": full})
     datasets = container.dataset_registry.list()
     # Apply basic filtering if needed, though HF API handles it more complexly.
     # For now, return all formatted as needed by frontend
@@ -55,6 +77,8 @@ def list_datasets(
 
 @router.post("/api/repos/create", summary="Create a new dataset repository")
 def create_repo(req: CreateRepoRequest):
+    if container.dataset_registry is None:
+        raise HTTPException(503, "Dataset registry is disabled; cannot create datasets when using external HF API")
     if req.type != "dataset":
         raise HTTPException(400, "Only dataset creation is supported")
     
@@ -86,6 +110,8 @@ def create_repo(req: CreateRepoRequest):
 
 @router.delete("/api/repos/delete", summary="Delete a dataset repository")
 def delete_repo(req: DeleteRepoRequest):
+    if container.dataset_registry is None:
+        raise HTTPException(503, "Dataset registry is disabled; cannot delete datasets when using external HF API")
     if req.type != "dataset":
         raise HTTPException(400, "Only dataset deletion is supported")
     
@@ -107,6 +133,8 @@ async def upload_file(
     path: str,
     file: UploadFile = File(...),
 ):
+    if container.dataset_registry is None:
+        raise HTTPException(503, "Dataset registry is disabled; cannot upload files when using external HF API")
     repo_id = f"{namespace}/{dataset_name}"
     ds = container.dataset_registry.get_by_repo_id(repo_id)
     
@@ -137,6 +165,8 @@ async def upload_file(
 @router.get("/api/datasets/{namespace}/{dataset_name}", summary="Get dataset repository metadata")
 def get_dataset_metadata(namespace: str, dataset_name: str):
     repo_id = f"{namespace}/{dataset_name}"
+    if container.dataset_registry is None:
+        return _proxy_get(f"/api/datasets/{repo_id}")
     ds = container.dataset_registry.get_by_repo_id(repo_id)
     if not ds:
         raise HTTPException(404, "Dataset not found")
@@ -164,6 +194,22 @@ def get_dataset_metadata(namespace: str, dataset_name: str):
 @router.get("/datasets/{namespace}/{dataset_name}/resolve/{revision}/{path:path}", summary="Download or stream a file")
 def resolve_file(namespace: str, dataset_name: str, revision: str, path: str):
     repo_id = f"{namespace}/{dataset_name}"
+    if container.dataset_registry is None:
+        if not settings.EXTERNAL_HF_API_URL:
+            raise HTTPException(503, "Dataset registry is disabled and EXTERNAL_HF_API_URL is not configured")
+        import httpx
+        url = f"{settings.EXTERNAL_HF_API_URL.rstrip('/')}/datasets/{repo_id}/resolve/{revision}/{path}"
+        try:
+            resp = httpx.get(url, timeout=60, follow_redirects=True)
+            if resp.status_code == 404:
+                raise HTTPException(404, "File not found in external HF API")
+            resp.raise_for_status()
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(502, f"External HF API request failed: {e}")
+        from fastapi.responses import Response
+        return Response(content=resp.content, media_type=resp.headers.get("content-type", "application/octet-stream"))
     ds = container.dataset_registry.get_by_repo_id(repo_id)
     if not ds:
         raise HTTPException(404, "Dataset not found")

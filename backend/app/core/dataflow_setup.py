@@ -14,12 +14,11 @@ def setup_dataflow_core():
     if not os.listdir(core_dir):
         # 假设有一些初始文件需要复制到 core 目录
         logging.info(f"Setting up DataFlow core directory at {core_dir}")
-        # 需要在core_dir工作路径下通过系统命令行执行 dataflow init指令，并归还工作路径
-        os.chdir(core_dir)
-        os.system("dataflow init")
-        os.chdir("../..")
+        import subprocess
+        result = subprocess.run(["dataflow", "init"], cwd=core_dir, capture_output=True, text=True)
+        if result.returncode != 0:
+            logging.warning(f"dataflow init exited with code {result.returncode}: {result.stderr}")
         logging.info("DataFlow core setup completed.")
-        print("Current working directory:", os.getcwd())
     else:
         logging.info(f"DataFlow core directory at {core_dir} already set up.")
 

@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     DEFAULT_SERVING_FILLING: bool = True # whether to fill default values for missing fields in serving
     ENABLE_DATASETS_API: bool = True # whether to enable datasets API
     ENABLE_HF_API: bool = True # whether to enable HF API
+    EXTERNAL_HF_API_URL: str = ""  # HF-compatible datasets API to delegate to when ENABLE_DATASETS_API=false (e.g. http://localhost:18000/api/hf)
 
     # white list of preset pipelines that can be shown in the frontend pipeline template list
     _PRESET_PIPELINE_NAME_WHITELIST = {

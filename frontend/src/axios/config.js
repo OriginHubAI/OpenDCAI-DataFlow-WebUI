@@ -2,8 +2,9 @@ import axios from 'axios'
 
 let ax = axios.create()
 
-// config here
-if (import.meta.env.MODE == 'production') {
+// Use VITE_BACKEND_URL when explicitly set (e.g. embedded/production builds),
+// fall back to '/api' for local dev server.
+if (import.meta.env.VITE_BACKEND_URL) {
     ax.defaults.baseURL = import.meta.env.VITE_BACKEND_URL
 } else {
     ax.defaults.baseURL = '/api'

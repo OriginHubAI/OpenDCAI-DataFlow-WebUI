@@ -354,10 +354,13 @@ class PipelineRegistry:
         try:
             if not os.path.exists(pipeline_file_path):
                 return ""
-                
+
+            if container.dataset_registry is None:
+                return ""
+
             with open(pipeline_file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            
+
             # 查找 first_entry_file_name="..."
             match = re.search(r'first_entry_file_name\s*=\s*["\']([^"\']+)["\']', content)
             if match:
@@ -371,9 +374,9 @@ class PipelineRegistry:
                 # 这样的相对路径（相对于 backend/data/）
                 data_parent_dir = os.path.dirname(settings.DATAFLOW_CORE_DIR)  # .../backend/data
                 rel_path_from_data_root = os.path.relpath(abs_path, data_parent_dir)
-                
+
                 # 尝试从DatasetRegistry中查找
-                
+
                 # 1. 尝试通过路径匹配
                 all_datasets = container.dataset_registry.list()
                 for ds in all_datasets:

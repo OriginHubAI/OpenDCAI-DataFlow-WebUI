@@ -2,8 +2,28 @@ from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.core.container import container
+from app.core.config import settings
 
 router = APIRouter(tags=["hf-viewer"])
+
+
+def _proxy_viewer(endpoint: str, params: dict):
+    """Proxy a viewer request to EXTERNAL_HF_API_URL. Raises HTTPException on failure."""
+    if not settings.EXTERNAL_HF_API_URL:
+        raise HTTPException(503, "Dataset registry is disabled and EXTERNAL_HF_API_URL is not configured")
+    import httpx
+    url = settings.EXTERNAL_HF_API_URL.rstrip("/") + "/" + endpoint.lstrip("/")
+    try:
+        resp = httpx.get(url, params={k: v for k, v in params.items() if v is not None}, timeout=30)
+        if resp.status_code == 404:
+            raise HTTPException(404, resp.text)
+        resp.raise_for_status()
+        return resp.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(502, f"External HF API request failed: {e}")
+
 
 @router.get("/is-valid", summary="Check supported capabilities")
 def is_valid(
@@ -11,6 +31,8 @@ def is_valid(
     config: Optional[str] = "default",
     split: Optional[str] = None
 ):
+    if container.dataset_registry is None:
+        return _proxy_viewer("/is-valid", {"dataset": dataset, "config": config, "split": split})
     ds = container.dataset_registry.get_by_repo_id(dataset)
     if not ds:
         raise HTTPException(404, "Dataset not found")
@@ -28,6 +50,8 @@ def get_splits(
     dataset: str,
     config: Optional[str] = None
 ):
+    if container.dataset_registry is None:
+        return _proxy_viewer("/splits", {"dataset": dataset, "config": config})
     ds = container.dataset_registry.get_by_repo_id(dataset)
     if not ds:
         raise HTTPException(404, "Dataset not found")
@@ -55,6 +79,8 @@ def get_info(
     dataset: str,
     config: Optional[str] = "default"
 ):
+    if container.dataset_registry is None:
+        return _proxy_viewer("/info", {"dataset": dataset, "config": config})
     ds = container.dataset_registry.get_by_repo_id(dataset)
     if not ds:
         raise HTTPException(404, "Dataset not found")
@@ -106,6 +132,8 @@ def get_first_rows(
     config: Optional[str] = "default",
     split: Optional[str] = "default"
 ):
+    if container.dataset_registry is None:
+        return _proxy_viewer("/first-rows", {"dataset": dataset, "config": config, "split": split})
     ds = container.dataset_registry.get_by_repo_id(dataset)
     if not ds:
         raise HTTPException(404, "Dataset not found")
@@ -152,6 +180,9 @@ def get_rows(
     offset: int = Query(0, ge=0),
     length: int = Query(100, ge=1, le=100)
 ):
+    if container.dataset_registry is None:
+        return _proxy_viewer("/rows", {"dataset": dataset, "config": config, "split": split,
+                                       "offset": offset, "length": length})
     ds = container.dataset_registry.get_by_repo_id(dataset)
     if not ds:
         raise HTTPException(404, "Dataset not found")

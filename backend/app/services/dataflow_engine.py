@@ -20,6 +20,76 @@ from contextlib import redirect_stdout, redirect_stderr
 
 logger = get_logger(__name__)
 
+
+def _resolve_dataset_from_external_hf(dataset_id: str) -> Dict[str, Any]:
+    """
+    When dataset_registry is None (ENABLE_DATASETS_API=false), resolve the dataset
+    via EXTERNAL_HF_API_URL (e.g. dcai-platform's /api/hf/).
+
+    Fetches dataset metadata to find the data file, downloads it to local cache,
+    and returns a dataset dict with 'root' pointing to the cached file path.
+    """
+    if not settings.EXTERNAL_HF_API_URL:
+        raise DataFlowEngineError(
+            "Dataset registry is disabled. Set EXTERNAL_HF_API_URL to point to an "
+            "HF-compatible datasets API, or set ENABLE_DATASETS_API=true.",
+            context={"dataset_id": dataset_id}
+        )
+
+    import httpx
+    base_url = settings.EXTERNAL_HF_API_URL.rstrip("/")
+
+    # Step 1: fetch metadata to discover available files
+    try:
+        meta_resp = httpx.get(f"{base_url}/api/datasets/{dataset_id}", timeout=15)
+        meta_resp.raise_for_status()
+        metadata = meta_resp.json()
+    except Exception as e:
+        raise DataFlowEngineError(
+            "Failed to fetch dataset metadata from external HF API",
+            context={"dataset_id": dataset_id, "url": base_url, "error": str(e)}
+        )
+
+    siblings = metadata.get("siblings", [])
+    if not siblings:
+        raise DataFlowEngineError(
+            "External dataset has no files",
+            context={"dataset_id": dataset_id}
+        )
+
+    # Pick the first data file (prefer jsonl/json/csv/parquet over .py / README)
+    data_extensions = {".jsonl", ".json", ".csv", ".parquet"}
+    data_file = next(
+        (s["rfilename"] for s in siblings
+         if os.path.splitext(s["rfilename"])[1].lower() in data_extensions),
+        siblings[0]["rfilename"]
+    )
+    file_ext = os.path.splitext(data_file)[1].lstrip(".")
+
+    # Step 2: download to local cache
+    cache_dir = os.path.join(settings.CACHE_DIR, "external_datasets", dataset_id.replace("/", "_"))
+    os.makedirs(cache_dir, exist_ok=True)
+    local_path = os.path.join(cache_dir, os.path.basename(data_file))
+    try:
+        file_resp = httpx.get(
+            f"{base_url}/datasets/{dataset_id}/resolve/main/{data_file}",
+            timeout=120,
+            follow_redirects=True,
+        )
+        file_resp.raise_for_status()
+        with open(local_path, "wb") as f:
+            f.write(file_resp.content)
+        logger.info(f"Downloaded external dataset to cache: {local_path}")
+    except Exception as e:
+        raise DataFlowEngineError(
+            "Failed to download dataset file from external HF API",
+            context={"dataset_id": dataset_id, "file": data_file, "error": str(e)}
+        )
+
+    return {"id": dataset_id, "root": local_path, "type": file_ext,
+            "name": metadata.get("id", dataset_id)}
+
+
 class DataFlowEngineError(Exception):
     """DataFlow Engine 自定义异常类"""
     def __init__(self, message: str, context: Dict[str, Any] = None, original_error: Exception = None):
@@ -186,15 +256,19 @@ class DataFlowEngine:
                     context={"pipeline_config": pipeline_config}
                 )
             
-            dataset = container.dataset_registry.get(input_dataset_id)
+            dataset = (
+                _resolve_dataset_from_external_hf(input_dataset_id)
+                if container.dataset_registry is None
+                else container.dataset_registry.get(input_dataset_id)
+            )
             if not dataset:
                 raise DataFlowEngineError(
                     f"Dataset not found",
                     context={"dataset_id": input_dataset_id}
                 )
-            
+
             from app.core.config import settings
-            
+
             cache_path = settings.CACHE_DIR
             
             # 确保 cache 目录存在
@@ -398,7 +472,11 @@ class DataFlowEngine:
                         context={"pipeline_config": pipeline_config}
                     )
                 
-                dataset = container.dataset_registry.get(input_dataset_id)
+                dataset = (
+                    _resolve_dataset_from_external_hf(input_dataset_id)
+                    if container.dataset_registry is None
+                    else container.dataset_registry.get(input_dataset_id)
+                )
                 if not dataset:
                     raise DataFlowEngineError(
                         f"数据集未找到",
