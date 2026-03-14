@@ -11,10 +11,10 @@ if (import.meta.env.VITE_BACKEND_URL) {
 }
 
 // DataFlow API path prefix.
-// Set VITE_DF_BACKEND_PREFIX to route all DataFlow API calls through a different
-// base path (e.g. '/api/v2/dataflow' to go through Django auth middleware).
-// Defaults to '/api/v1' to keep backward compatibility with standalone mode.
-export const dfApiPrefix = import.meta.env.VITE_DF_BACKEND_PREFIX || '/api/v1'
+// Set VITE_BACKEND_PREFIX to route all DataFlow API calls through a different
+// base path (e.g. '/api/v2/dataflow' when integrated with dcai platform).
+// Defaults to '/api/v1' for standalone mode.
+export const dfApiPrefix = import.meta.env.VITE_BACKEND_PREFIX || '/api/v1'
 
 ax.interceptors.request.use(
     (config) => {
