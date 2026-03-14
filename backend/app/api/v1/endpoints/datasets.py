@@ -71,16 +71,32 @@ def get_pandas_data(ds_id: str, start: int = 0, end: int = 5):
 
 # Get other data by file
 from fastapi.responses import FileResponse
+
+# File types that should be returned as JSON-formatted sample data (tabular/text)
+_PANDAS_TYPES = {"csv", "excel", "json", "parquet", "pickle", "jsonl"}
+
 @router.get("/file_type_sample/{ds_id}", operation_id="get_file_type_data", summary="获取指定数据集的文件类型样本数据，用于前端展示下载，可以是图片、文本等")
-def get_file_type_data(ds_id: str):
+def get_file_type_data(ds_id: str, start: int = 0, end: int = 5):
+    ds = container.dataset_registry.get(ds_id)
+    if not ds:
+        raise HTTPException(404, "Dataset not found")
+
+    file_type = ds.get("type", "").lower()
+
+    # For tabular/text types: return JSON-formatted sample data (same format as pandas_type_sample)
+    # so that the frontend can parse res.data as ApiResponse[str]
+    if file_type in _PANDAS_TYPES:
+        try:
+            return ok(container.dataset_visualize_service.get_pandas_read_function(ds, start, end))
+        except Exception as e:
+            raise HTTPException(500, f"Failed to get sample data: {e}")
+
+    # For binary types (images, PDFs, etc.): return raw file
     try:
-        ds = container.dataset_registry.get(ds_id)
-        if not ds:
-            raise HTTPException(404, "Dataset not found")
         file_path, media_type = container.dataset_visualize_service.get_other_visualization_data(ds)
     except Exception as e:
         raise HTTPException(500, f"Failed to get file type data: {e}")
-    
+
     return FileResponse(
         file_path,
         filename=os.path.basename(file_path),

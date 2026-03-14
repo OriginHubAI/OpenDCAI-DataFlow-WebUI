@@ -1,6 +1,6 @@
 /* eslint-disable */
 // More information: https://github.com/minskiter/openapijs
-import axios from './config.js'
+import axios, { dfApiPrefix } from './config.js'
 import * as Axios from 'axios'
 import * as UserModel from './model.js'
 
@@ -19,7 +19,7 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/datasets' : '/api/v1/datasets/',
+                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/datasets' : dfApiPrefix + '/datasets/',
                 data: {},
                 params: {},
                 headers: {
@@ -77,7 +77,7 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/repos/create' : '/api/v1/datasets/',
+                url: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? '/api/hf/api/repos/create' : dfApiPrefix + '/datasets/',
                 data: import.meta.env.VITE_USE_HF_ENDPOINT === 'true' ? { name: datasetin.name, type: 'dataset' } : datasetin,
                 params: {},
                 headers: {
@@ -134,7 +134,7 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/datasets/list_dir',
+                url: dfApiPrefix + '/datasets/list_dir',
                 data: {},
                 params: { path },
                 headers: {
@@ -188,7 +188,7 @@ export class datasets {
             // For HF, dataset ID is the repo_id e.g. "local/my-dataset"
             let options = {
                 method: 'get',
-                url: isHF ? '/api/hf/api/datasets/' + pathds_id + '' : '/api/v1/datasets/' + pathds_id + '',
+                url: dfApiPrefix + '/datasets/' + pathds_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -246,7 +246,7 @@ export class datasets {
             let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'delete',
-                url: isHF ? '/api/hf/api/repos/delete' : '/api/v1/datasets/' + pathds_id + '',
+                url: isHF ? '/api/hf/api/repos/delete' : dfApiPrefix + '/datasets/' + pathds_id + '',
                 data: isHF ? { name: pathds_id.split('/').pop() || pathds_id, type: 'dataset' } : {},
                 params: {},
                 headers: {
@@ -313,7 +313,7 @@ export class datasets {
             let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/file_type_sample/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : dfApiPrefix + '/datasets/file_type_sample/' + pathds_id + '',
                 data: {},
                 params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: start || 0, length: end ? end - (start || 0) : 5 } : { start, end },
                 headers: {
@@ -374,7 +374,7 @@ export class datasets {
             let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/file_type_sample/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : dfApiPrefix + '/datasets/file_type_sample/' + pathds_id + '',
                 data: {},
                 params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: 0, length: 1 } : {},
                 headers: {
@@ -441,7 +441,7 @@ export class datasets {
             let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: isHF ? '/api/hf/viewer/rows' : '/api/v1/datasets/preview/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/rows' : dfApiPrefix + '/datasets/preview/' + pathds_id + '',
                 data: {},
                 params: isHF ? { dataset: pathds_id, config: "default", split: "default", offset: 0, length: num_lines } : { num_lines },
                 headers: {
@@ -500,7 +500,7 @@ export class datasets {
             let isHF = import.meta.env.VITE_USE_HF_ENDPOINT === 'true'
             let options = {
                 method: 'get',
-                url: isHF ? '/api/hf/viewer/info' : '/api/v1/datasets/columns/' + pathds_id + '',
+                url: isHF ? '/api/hf/viewer/info' : dfApiPrefix + '/datasets/columns/' + pathds_id + '',
                 data: {},
                 params: isHF ? { dataset: pathds_id, config: "default" } : {},
                 headers: {
@@ -565,7 +565,7 @@ export class datasets {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/datasets/upload',
+                url: dfApiPrefix + '/datasets/upload',
                 data: body_upload_dataset,
                 params: { name },
                 headers: {
@@ -610,83 +610,83 @@ export class datasets {
 /**
  * @description list_datasets url链接，包含baseURL
  */
-datasets.list_datasets.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/`
+datasets.list_datasets.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/`
 /**
  * @description list_datasets url链接，不包含baseURL
  */
-datasets.list_datasets.path = `/api/v1/datasets/`
+datasets.list_datasets.path = `${dfApiPrefix}/datasets/`
 /**
  * @description register_dataset url链接，包含baseURL
  */
-datasets.register_dataset.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/`
+datasets.register_dataset.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/`
 /**
  * @description register_dataset url链接，不包含baseURL
  */
-datasets.register_dataset.path = `/api/v1/datasets/`
+datasets.register_dataset.path = `${dfApiPrefix}/datasets/`
 /**
  * @description listDir url链接，包含baseURL
  */
-datasets.listDir.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/list_dir`
+datasets.listDir.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/list_dir`
 /**
  * @description listDir url链接，不包含baseURL
  */
-datasets.listDir.path = `/api/v1/datasets/list_dir`
+datasets.listDir.path = `${dfApiPrefix}/datasets/list_dir`
 /**
  * @description get_dataset url链接，包含baseURL
  */
-datasets.get_dataset.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/{ds_id}`
+datasets.get_dataset.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/{ds_id}`
 /**
  * @description get_dataset url链接，不包含baseURL
  */
-datasets.get_dataset.path = `/api/v1/datasets/{ds_id}`
+datasets.get_dataset.path = `${dfApiPrefix}/datasets/{ds_id}`
 /**
  * @description delete_dataset url链接，包含baseURL
  */
-datasets.delete_dataset.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/{ds_id}`
+datasets.delete_dataset.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/{ds_id}`
 /**
  * @description delete_dataset url链接，不包含baseURL
  */
-datasets.delete_dataset.path = `/api/v1/datasets/{ds_id}`
+datasets.delete_dataset.path = `${dfApiPrefix}/datasets/{ds_id}`
 /**
  * @description get_pandas_data url链接，包含baseURL
  */
-datasets.get_pandas_data.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/pandas_type_sample/{ds_id}`
+datasets.get_pandas_data.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/pandas_type_sample/{ds_id}`
 /**
  * @description get_pandas_data url链接，不包含baseURL
  */
-datasets.get_pandas_data.path = `/api/v1/datasets/pandas_type_sample/{ds_id}`
+datasets.get_pandas_data.path = `${dfApiPrefix}/datasets/pandas_type_sample/{ds_id}`
 /**
  * @description get_file_type_data url链接，包含baseURL
  */
-datasets.get_file_type_data.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/file_type_sample/{ds_id}`
+datasets.get_file_type_data.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/file_type_sample/{ds_id}`
 /**
  * @description get_file_type_data url链接，不包含baseURL
  */
-datasets.get_file_type_data.path = `/api/v1/datasets/file_type_sample/{ds_id}`
+datasets.get_file_type_data.path = `${dfApiPrefix}/datasets/file_type_sample/{ds_id}`
 /**
  * @description get_dataset_preview url链接，包含baseURL
  */
-datasets.get_dataset_preview.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/preview/{ds_id}`
+datasets.get_dataset_preview.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/preview/{ds_id}`
 /**
  * @description get_dataset_preview url链接，不包含baseURL
  */
-datasets.get_dataset_preview.path = `/api/v1/datasets/preview/{ds_id}`
+datasets.get_dataset_preview.path = `${dfApiPrefix}/datasets/preview/{ds_id}`
 /**
  * @description get_dataset_columns url链接，包含baseURL
  */
-datasets.get_dataset_columns.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/columns/{ds_id}`
+datasets.get_dataset_columns.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/columns/{ds_id}`
 /**
  * @description get_dataset_columns url链接，不包含baseURL
  */
-datasets.get_dataset_columns.path = `/api/v1/datasets/columns/{ds_id}`
+datasets.get_dataset_columns.path = `${dfApiPrefix}/datasets/columns/{ds_id}`
 /**
  * @description upload_dataset url链接，包含baseURL
  */
-datasets.upload_dataset.fullPath = `${axios.defaults.baseURL}/api/v1/datasets/upload`
+datasets.upload_dataset.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/datasets/upload`
 /**
  * @description upload_dataset url链接，不包含baseURL
  */
-datasets.upload_dataset.path = `/api/v1/datasets/upload`
+datasets.upload_dataset.path = `${dfApiPrefix}/datasets/upload`
 
 export class operators {
     /**
@@ -701,7 +701,7 @@ export class operators {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/operators/',
+                url: dfApiPrefix + '/operators/',
                 data: {},
                 params: { lang },
                 headers: {
@@ -753,7 +753,7 @@ export class operators {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/operators/details',
+                url: dfApiPrefix + '/operators/details',
                 data: {},
                 params: { lang },
                 headers: {
@@ -812,7 +812,7 @@ export class operators {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/operators/details/' + pathop_name + '',
+                url: dfApiPrefix + '/operators/details/' + pathop_name + '',
                 data: {},
                 params: { lang },
                 headers: {
@@ -857,27 +857,27 @@ export class operators {
 /**
  * @description list_operators url链接，包含baseURL
  */
-operators.list_operators.fullPath = `${axios.defaults.baseURL}/api/v1/operators/`
+operators.list_operators.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/operators/`
 /**
  * @description list_operators url链接，不包含baseURL
  */
-operators.list_operators.path = `/api/v1/operators/`
+operators.list_operators.path = `${dfApiPrefix}/operators/`
 /**
  * @description list_operators_details url链接，包含baseURL
  */
-operators.list_operators_details.fullPath = `${axios.defaults.baseURL}/api/v1/operators/details`
+operators.list_operators_details.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/operators/details`
 /**
  * @description list_operators_details url链接，不包含baseURL
  */
-operators.list_operators_details.path = `/api/v1/operators/details`
+operators.list_operators_details.path = `${dfApiPrefix}/operators/details`
 /**
  * @description get_operator_detail_by_name url链接，包含baseURL
  */
-operators.get_operator_detail_by_name.fullPath = `${axios.defaults.baseURL}/api/v1/operators/details/{op_name}`
+operators.get_operator_detail_by_name.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/operators/details/{op_name}`
 /**
  * @description get_operator_detail_by_name url链接，不包含baseURL
  */
-operators.get_operator_detail_by_name.path = `/api/v1/operators/details/{op_name}`
+operators.get_operator_detail_by_name.path = `${dfApiPrefix}/operators/details/{op_name}`
 
 export class tasks {
     /**
@@ -891,7 +891,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/tasks/executions',
+                url: dfApiPrefix + '/tasks/executions',
                 data: {},
                 params: {},
                 headers: {
@@ -943,7 +943,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/tasks/execution/' + pathtask_id + '/status',
+                url: dfApiPrefix + '/tasks/execution/' + pathtask_id + '/status',
                 data: {},
                 params: {},
                 headers: {
@@ -1004,7 +1004,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/tasks/execution/' + pathtask_id + '/result',
+                url: dfApiPrefix + '/tasks/execution/' + pathtask_id + '/result',
                 data: {},
                 params: { step, limit },
                 headers: {
@@ -1063,7 +1063,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/tasks/execution/' + pathtask_id + '/log',
+                url: dfApiPrefix + '/tasks/execution/' + pathtask_id + '/log',
                 data: {},
                 params: { operator_name },
                 headers: {
@@ -1122,7 +1122,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/tasks/execution/' + pathtask_id + '/download',
+                url: dfApiPrefix + '/tasks/execution/' + pathtask_id + '/download',
                 data: {},
                 params: { step },
                 headers: {
@@ -1174,7 +1174,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/tasks/execute',
+                url: dfApiPrefix + '/tasks/execute',
                 data: {},
                 params: { pipeline_id },
                 headers: {
@@ -1231,7 +1231,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/tasks/execute-async',
+                url: dfApiPrefix + '/tasks/execute-async',
                 data: {},
                 params: { pipeline_id },
                 headers: {
@@ -1283,7 +1283,7 @@ export class tasks {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/tasks/execution/' + pathtask_id + '/kill',
+                url: dfApiPrefix + '/tasks/execution/' + pathtask_id + '/kill',
                 data: {},
                 params: {},
                 headers: {
@@ -1328,67 +1328,67 @@ export class tasks {
 /**
  * @description list_executions url链接，包含baseURL
  */
-tasks.list_executions.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/executions`
+tasks.list_executions.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/executions`
 /**
  * @description list_executions url链接，不包含baseURL
  */
-tasks.list_executions.path = `/api/v1/tasks/executions`
+tasks.list_executions.path = `${dfApiPrefix}/tasks/executions`
 /**
  * @description get_execution_status url链接，包含baseURL
  */
-tasks.get_execution_status.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execution/{task_id}/status`
+tasks.get_execution_status.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execution/{task_id}/status`
 /**
  * @description get_execution_status url链接，不包含baseURL
  */
-tasks.get_execution_status.path = `/api/v1/tasks/execution/{task_id}/status`
+tasks.get_execution_status.path = `${dfApiPrefix}/tasks/execution/{task_id}/status`
 /**
  * @description get_task_result url链接，包含baseURL
  */
-tasks.get_task_result.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execution/{task_id}/result`
+tasks.get_task_result.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execution/{task_id}/result`
 /**
  * @description get_task_result url链接，不包含baseURL
  */
-tasks.get_task_result.path = `/api/v1/tasks/execution/{task_id}/result`
+tasks.get_task_result.path = `${dfApiPrefix}/tasks/execution/{task_id}/result`
 /**
  * @description get_execution_log url链接，包含baseURL
  */
-tasks.get_execution_log.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execution/{task_id}/log`
+tasks.get_execution_log.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execution/{task_id}/log`
 /**
  * @description get_execution_log url链接，不包含baseURL
  */
-tasks.get_execution_log.path = `/api/v1/tasks/execution/{task_id}/log`
+tasks.get_execution_log.path = `${dfApiPrefix}/tasks/execution/{task_id}/log`
 /**
  * @description download_task_result url链接，包含baseURL
  */
-tasks.download_task_result.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execution/{task_id}/download`
+tasks.download_task_result.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execution/{task_id}/download`
 /**
  * @description download_task_result url链接，不包含baseURL
  */
-tasks.download_task_result.path = `/api/v1/tasks/execution/{task_id}/download`
+tasks.download_task_result.path = `${dfApiPrefix}/tasks/execution/{task_id}/download`
 /**
  * @description execute_pipeline url链接，包含baseURL
  */
-tasks.execute_pipeline.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execute`
+tasks.execute_pipeline.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execute`
 /**
  * @description execute_pipeline url链接，不包含baseURL
  */
-tasks.execute_pipeline.path = `/api/v1/tasks/execute`
+tasks.execute_pipeline.path = `${dfApiPrefix}/tasks/execute`
 /**
  * @description execute_pipeline_async url链接，包含baseURL
  */
-tasks.execute_pipeline_async.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execute-async`
+tasks.execute_pipeline_async.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execute-async`
 /**
  * @description execute_pipeline_async url链接，不包含baseURL
  */
-tasks.execute_pipeline_async.path = `/api/v1/tasks/execute-async`
+tasks.execute_pipeline_async.path = `${dfApiPrefix}/tasks/execute-async`
 /**
  * @description kill_execution url链接，包含baseURL
  */
-tasks.kill_execution.fullPath = `${axios.defaults.baseURL}/api/v1/tasks/execution/{task_id}/kill`
+tasks.kill_execution.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/tasks/execution/{task_id}/kill`
 /**
  * @description kill_execution url链接，不包含baseURL
  */
-tasks.kill_execution.path = `/api/v1/tasks/execution/{task_id}/kill`
+tasks.kill_execution.path = `${dfApiPrefix}/tasks/execution/{task_id}/kill`
 
 export class pipelines {
     /**
@@ -1402,7 +1402,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/pipelines/',
+                url: dfApiPrefix + '/pipelines/',
                 data: {},
                 params: {},
                 headers: {
@@ -1454,7 +1454,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/pipelines/',
+                url: dfApiPrefix + '/pipelines/',
                 data: pipelinein,
                 params: {},
                 headers: {
@@ -1505,7 +1505,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/pipelines/templates',
+                url: dfApiPrefix + '/pipelines/templates',
                 data: {},
                 params: {},
                 headers: {
@@ -1557,7 +1557,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/pipelines/' + pathpipeline_id + '',
+                url: dfApiPrefix + '/pipelines/' + pathpipeline_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -1616,7 +1616,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'put',
-                url: '/api/v1/pipelines/' + pathpipeline_id + '',
+                url: dfApiPrefix + '/pipelines/' + pathpipeline_id + '',
                 data: pipelineupdatein,
                 params: {},
                 headers: {
@@ -1668,7 +1668,7 @@ export class pipelines {
             let responseType = 'json'
             let options = {
                 method: 'delete',
-                url: '/api/v1/pipelines/' + pathpipeline_id + '',
+                url: dfApiPrefix + '/pipelines/' + pathpipeline_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -1713,51 +1713,51 @@ export class pipelines {
 /**
  * @description list_pipelines url链接，包含baseURL
  */
-pipelines.list_pipelines.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/`
+pipelines.list_pipelines.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/`
 /**
  * @description list_pipelines url链接，不包含baseURL
  */
-pipelines.list_pipelines.path = `/api/v1/pipelines/`
+pipelines.list_pipelines.path = `${dfApiPrefix}/pipelines/`
 /**
  * @description create_pipeline url链接，包含baseURL
  */
-pipelines.create_pipeline.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/`
+pipelines.create_pipeline.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/`
 /**
  * @description create_pipeline url链接，不包含baseURL
  */
-pipelines.create_pipeline.path = `/api/v1/pipelines/`
+pipelines.create_pipeline.path = `${dfApiPrefix}/pipelines/`
 /**
  * @description list_template_pipelines url链接，包含baseURL
  */
-pipelines.list_template_pipelines.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/templates`
+pipelines.list_template_pipelines.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/templates`
 /**
  * @description list_template_pipelines url链接，不包含baseURL
  */
-pipelines.list_template_pipelines.path = `/api/v1/pipelines/templates`
+pipelines.list_template_pipelines.path = `${dfApiPrefix}/pipelines/templates`
 /**
  * @description get_pipeline url链接，包含baseURL
  */
-pipelines.get_pipeline.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/{pipeline_id}`
+pipelines.get_pipeline.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/{pipeline_id}`
 /**
  * @description get_pipeline url链接，不包含baseURL
  */
-pipelines.get_pipeline.path = `/api/v1/pipelines/{pipeline_id}`
+pipelines.get_pipeline.path = `${dfApiPrefix}/pipelines/{pipeline_id}`
 /**
  * @description update_pipeline url链接，包含baseURL
  */
-pipelines.update_pipeline.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/{pipeline_id}`
+pipelines.update_pipeline.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/{pipeline_id}`
 /**
  * @description update_pipeline url链接，不包含baseURL
  */
-pipelines.update_pipeline.path = `/api/v1/pipelines/{pipeline_id}`
+pipelines.update_pipeline.path = `${dfApiPrefix}/pipelines/{pipeline_id}`
 /**
  * @description delete_pipeline url链接，包含baseURL
  */
-pipelines.delete_pipeline.fullPath = `${axios.defaults.baseURL}/api/v1/pipelines/{pipeline_id}`
+pipelines.delete_pipeline.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/pipelines/{pipeline_id}`
 /**
  * @description delete_pipeline url链接，不包含baseURL
  */
-pipelines.delete_pipeline.path = `/api/v1/pipelines/{pipeline_id}`
+pipelines.delete_pipeline.path = `${dfApiPrefix}/pipelines/{pipeline_id}`
 
 export class prompts {
     /**
@@ -1775,7 +1775,7 @@ export class prompts {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/prompts/operator-mapping',
+                url: dfApiPrefix + '/prompts/operator-mapping',
                 data: {},
                 params: {},
                 headers: {
@@ -1830,7 +1830,7 @@ export class prompts {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/prompts/prompt-info',
+                url: dfApiPrefix + '/prompts/prompt-info',
                 data: {},
                 params: {},
                 headers: {
@@ -1887,7 +1887,7 @@ export class prompts {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/prompts/prompt-info/' + pathprompt_name + '',
+                url: dfApiPrefix + '/prompts/prompt-info/' + pathprompt_name + '',
                 data: {},
                 params: {},
                 headers: {
@@ -1944,7 +1944,7 @@ export class prompts {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/prompts/' + pathoperator_name + '',
+                url: dfApiPrefix + '/prompts/' + pathoperator_name + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2001,7 +2001,7 @@ export class prompts {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/prompts/source/' + pathprompt_name + '',
+                url: dfApiPrefix + '/prompts/source/' + pathprompt_name + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2046,43 +2046,43 @@ export class prompts {
 /**
  * @description get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get url链接，包含baseURL
  */
-prompts.get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get.fullPath = `${axios.defaults.baseURL}/api/v1/prompts/operator-mapping`
+prompts.get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/prompts/operator-mapping`
 /**
  * @description get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get url链接，不包含baseURL
  */
-prompts.get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get.path = `/api/v1/prompts/operator-mapping`
+prompts.get_operator_prompt_mapping_api_v1_prompts_operator_mapping_get.path = `${dfApiPrefix}/prompts/operator-mapping`
 /**
  * @description get_prompt_info_api_v1_prompts_prompt_info_get url链接，包含baseURL
  */
-prompts.get_prompt_info_api_v1_prompts_prompt_info_get.fullPath = `${axios.defaults.baseURL}/api/v1/prompts/prompt-info`
+prompts.get_prompt_info_api_v1_prompts_prompt_info_get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/prompts/prompt-info`
 /**
  * @description get_prompt_info_api_v1_prompts_prompt_info_get url链接，不包含baseURL
  */
-prompts.get_prompt_info_api_v1_prompts_prompt_info_get.path = `/api/v1/prompts/prompt-info`
+prompts.get_prompt_info_api_v1_prompts_prompt_info_get.path = `${dfApiPrefix}/prompts/prompt-info`
 /**
  * @description get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get url链接，包含baseURL
  */
-prompts.get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get.fullPath = `${axios.defaults.baseURL}/api/v1/prompts/prompt-info/{prompt_name}`
+prompts.get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/prompts/prompt-info/{prompt_name}`
 /**
  * @description get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get url链接，不包含baseURL
  */
-prompts.get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get.path = `/api/v1/prompts/prompt-info/{prompt_name}`
+prompts.get_prompt_info_api_v1_prompts_prompt_info__prompt_name__get.path = `${dfApiPrefix}/prompts/prompt-info/{prompt_name}`
 /**
  * @description get_prompts_api_v1_prompts__operator_name__get url链接，包含baseURL
  */
-prompts.get_prompts_api_v1_prompts__operator_name__get.fullPath = `${axios.defaults.baseURL}/api/v1/prompts/{operator_name}`
+prompts.get_prompts_api_v1_prompts__operator_name__get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/prompts/{operator_name}`
 /**
  * @description get_prompts_api_v1_prompts__operator_name__get url链接，不包含baseURL
  */
-prompts.get_prompts_api_v1_prompts__operator_name__get.path = `/api/v1/prompts/{operator_name}`
+prompts.get_prompts_api_v1_prompts__operator_name__get.path = `${dfApiPrefix}/prompts/{operator_name}`
 /**
  * @description get_prompt_source_api_v1_prompts_source__prompt_name__get url链接，包含baseURL
  */
-prompts.get_prompt_source_api_v1_prompts_source__prompt_name__get.fullPath = `${axios.defaults.baseURL}/api/v1/prompts/source/{prompt_name}`
+prompts.get_prompt_source_api_v1_prompts_source__prompt_name__get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/prompts/source/{prompt_name}`
 /**
  * @description get_prompt_source_api_v1_prompts_source__prompt_name__get url链接，不包含baseURL
  */
-prompts.get_prompt_source_api_v1_prompts_source__prompt_name__get.path = `/api/v1/prompts/source/{prompt_name}`
+prompts.get_prompt_source_api_v1_prompts_source__prompt_name__get.path = `${dfApiPrefix}/prompts/source/{prompt_name}`
 
 export class serving {
     /**
@@ -2100,7 +2100,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/serving/',
+                url: dfApiPrefix + '/serving/',
                 data: {},
                 params: {},
                 headers: {
@@ -2161,7 +2161,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/serving/',
+                url: dfApiPrefix + '/serving/',
                 data: array,
                 params: { name, cls_name },
                 headers: {
@@ -2212,7 +2212,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/serving/classes',
+                url: dfApiPrefix + '/serving/classes',
                 data: {},
                 params: {},
                 headers: {
@@ -2264,7 +2264,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/serving/' + pathid + '',
+                url: dfApiPrefix + '/serving/' + pathid + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2323,7 +2323,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'put',
-                url: '/api/v1/serving/' + pathid + '',
+                url: dfApiPrefix + '/serving/' + pathid + '',
                 data: servingupdateschema,
                 params: {},
                 headers: {
@@ -2375,7 +2375,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'delete',
-                url: '/api/v1/serving/' + pathid + '',
+                url: dfApiPrefix + '/serving/' + pathid + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2434,7 +2434,7 @@ export class serving {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/serving/' + pathid + '/test',
+                url: dfApiPrefix + '/serving/' + pathid + '/test',
                 data: servingtestschema,
                 params: {},
                 headers: {
@@ -2479,59 +2479,59 @@ export class serving {
 /**
  * @description list_serving_instances_api_v1_serving__get url链接，包含baseURL
  */
-serving.list_serving_instances_api_v1_serving__get.fullPath = `${axios.defaults.baseURL}/api/v1/serving/`
+serving.list_serving_instances_api_v1_serving__get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/`
 /**
  * @description list_serving_instances_api_v1_serving__get url链接，不包含baseURL
  */
-serving.list_serving_instances_api_v1_serving__get.path = `/api/v1/serving/`
+serving.list_serving_instances_api_v1_serving__get.path = `${dfApiPrefix}/serving/`
 /**
  * @description create_serving_instance url链接，包含baseURL
  */
-serving.create_serving_instance.fullPath = `${axios.defaults.baseURL}/api/v1/serving/`
+serving.create_serving_instance.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/`
 /**
  * @description create_serving_instance url链接，不包含baseURL
  */
-serving.create_serving_instance.path = `/api/v1/serving/`
+serving.create_serving_instance.path = `${dfApiPrefix}/serving/`
 /**
  * @description list_serving_classes url链接，包含baseURL
  */
-serving.list_serving_classes.fullPath = `${axios.defaults.baseURL}/api/v1/serving/classes`
+serving.list_serving_classes.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/classes`
 /**
  * @description list_serving_classes url链接，不包含baseURL
  */
-serving.list_serving_classes.path = `/api/v1/serving/classes`
+serving.list_serving_classes.path = `${dfApiPrefix}/serving/classes`
 /**
  * @description get_serving_detail url链接，包含baseURL
  */
-serving.get_serving_detail.fullPath = `${axios.defaults.baseURL}/api/v1/serving/{id}`
+serving.get_serving_detail.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/{id}`
 /**
  * @description get_serving_detail url链接，不包含baseURL
  */
-serving.get_serving_detail.path = `/api/v1/serving/{id}`
+serving.get_serving_detail.path = `${dfApiPrefix}/serving/{id}`
 /**
  * @description update_serving_instance url链接，包含baseURL
  */
-serving.update_serving_instance.fullPath = `${axios.defaults.baseURL}/api/v1/serving/{id}`
+serving.update_serving_instance.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/{id}`
 /**
  * @description update_serving_instance url链接，不包含baseURL
  */
-serving.update_serving_instance.path = `/api/v1/serving/{id}`
+serving.update_serving_instance.path = `${dfApiPrefix}/serving/{id}`
 /**
  * @description delete_serving_instance url链接，包含baseURL
  */
-serving.delete_serving_instance.fullPath = `${axios.defaults.baseURL}/api/v1/serving/{id}`
+serving.delete_serving_instance.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/{id}`
 /**
  * @description delete_serving_instance url链接，不包含baseURL
  */
-serving.delete_serving_instance.path = `/api/v1/serving/{id}`
+serving.delete_serving_instance.path = `${dfApiPrefix}/serving/{id}`
 /**
  * @description test_serving_instance url链接，包含baseURL
  */
-serving.test_serving_instance.fullPath = `${axios.defaults.baseURL}/api/v1/serving/{id}/test`
+serving.test_serving_instance.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/serving/{id}/test`
 /**
  * @description test_serving_instance url链接，不包含baseURL
  */
-serving.test_serving_instance.path = `/api/v1/serving/{id}/test`
+serving.test_serving_instance.path = `${dfApiPrefix}/serving/{id}/test`
 
 export class text2sql_database {
     /**
@@ -2545,7 +2545,7 @@ export class text2sql_database {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/text2sql_database/',
+                url: dfApiPrefix + '/text2sql_database/',
                 data: {},
                 params: {},
                 headers: {
@@ -2597,7 +2597,7 @@ export class text2sql_database {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/text2sql_database/' + pathdb_id + '',
+                url: dfApiPrefix + '/text2sql_database/' + pathdb_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2649,7 +2649,7 @@ export class text2sql_database {
             let responseType = 'json'
             let options = {
                 method: 'delete',
-                url: '/api/v1/text2sql_database/' + pathdb_id + '',
+                url: dfApiPrefix + '/text2sql_database/' + pathdb_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -2706,7 +2706,7 @@ export class text2sql_database {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/text2sql_database/upload',
+                url: dfApiPrefix + '/text2sql_database/upload',
                 data: body_upload_sqlite_database,
                 params: {},
                 headers: {
@@ -2751,35 +2751,35 @@ export class text2sql_database {
 /**
  * @description list_databases url链接，包含baseURL
  */
-text2sql_database.list_databases.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database/`
+text2sql_database.list_databases.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database/`
 /**
  * @description list_databases url链接，不包含baseURL
  */
-text2sql_database.list_databases.path = `/api/v1/text2sql_database/`
+text2sql_database.list_databases.path = `${dfApiPrefix}/text2sql_database/`
 /**
  * @description get_database_detail url链接，包含baseURL
  */
-text2sql_database.get_database_detail.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database/{db_id}`
+text2sql_database.get_database_detail.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database/{db_id}`
 /**
  * @description get_database_detail url链接，不包含baseURL
  */
-text2sql_database.get_database_detail.path = `/api/v1/text2sql_database/{db_id}`
+text2sql_database.get_database_detail.path = `${dfApiPrefix}/text2sql_database/{db_id}`
 /**
  * @description delete_database url链接，包含baseURL
  */
-text2sql_database.delete_database.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database/{db_id}`
+text2sql_database.delete_database.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database/{db_id}`
 /**
  * @description delete_database url链接，不包含baseURL
  */
-text2sql_database.delete_database.path = `/api/v1/text2sql_database/{db_id}`
+text2sql_database.delete_database.path = `${dfApiPrefix}/text2sql_database/{db_id}`
 /**
  * @description upload_sqlite_database url链接，包含baseURL
  */
-text2sql_database.upload_sqlite_database.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database/upload`
+text2sql_database.upload_sqlite_database.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database/upload`
 /**
  * @description upload_sqlite_database url链接，不包含baseURL
  */
-text2sql_database.upload_sqlite_database.path = `/api/v1/text2sql_database/upload`
+text2sql_database.upload_sqlite_database.path = `${dfApiPrefix}/text2sql_database/upload`
 
 export class text2sql_database_manager {
     /**
@@ -2793,7 +2793,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/text2sql_database_manager/',
+                url: dfApiPrefix + '/text2sql_database_manager/',
                 data: {},
                 params: {},
                 headers: {
@@ -2850,7 +2850,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/text2sql_database_manager/',
+                url: dfApiPrefix + '/text2sql_database_manager/',
                 data: text2sqldatabasemanagercreateschema,
                 params: {},
                 headers: {
@@ -2905,7 +2905,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/text2sql_database_manager/classes',
+                url: dfApiPrefix + '/text2sql_database_manager/classes',
                 data: {},
                 params: {},
                 headers: {
@@ -2962,7 +2962,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/text2sql_database_manager/' + pathmgr_id + '',
+                url: dfApiPrefix + '/text2sql_database_manager/' + pathmgr_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -3021,7 +3021,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'put',
-                url: '/api/v1/text2sql_database_manager/' + pathmgr_id + '',
+                url: dfApiPrefix + '/text2sql_database_manager/' + pathmgr_id + '',
                 data: text2sqldatabasemanagerupdateschema,
                 params: {},
                 headers: {
@@ -3078,7 +3078,7 @@ export class text2sql_database_manager {
             let responseType = 'json'
             let options = {
                 method: 'delete',
-                url: '/api/v1/text2sql_database_manager/' + pathmgr_id + '',
+                url: dfApiPrefix + '/text2sql_database_manager/' + pathmgr_id + '',
                 data: {},
                 params: {},
                 headers: {
@@ -3123,51 +3123,51 @@ export class text2sql_database_manager {
 /**
  * @description list_text2sql_database_managers url链接，包含baseURL
  */
-text2sql_database_manager.list_text2sql_database_managers.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/`
+text2sql_database_manager.list_text2sql_database_managers.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/`
 /**
  * @description list_text2sql_database_managers url链接，不包含baseURL
  */
-text2sql_database_manager.list_text2sql_database_managers.path = `/api/v1/text2sql_database_manager/`
+text2sql_database_manager.list_text2sql_database_managers.path = `${dfApiPrefix}/text2sql_database_manager/`
 /**
  * @description create_text2sql_database_manager url链接，包含baseURL
  */
-text2sql_database_manager.create_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/`
+text2sql_database_manager.create_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/`
 /**
  * @description create_text2sql_database_manager url链接，不包含baseURL
  */
-text2sql_database_manager.create_text2sql_database_manager.path = `/api/v1/text2sql_database_manager/`
+text2sql_database_manager.create_text2sql_database_manager.path = `${dfApiPrefix}/text2sql_database_manager/`
 /**
  * @description list_text2sql_database_manager_classes url链接，包含baseURL
  */
-text2sql_database_manager.list_text2sql_database_manager_classes.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/classes`
+text2sql_database_manager.list_text2sql_database_manager_classes.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/classes`
 /**
  * @description list_text2sql_database_manager_classes url链接，不包含baseURL
  */
-text2sql_database_manager.list_text2sql_database_manager_classes.path = `/api/v1/text2sql_database_manager/classes`
+text2sql_database_manager.list_text2sql_database_manager_classes.path = `${dfApiPrefix}/text2sql_database_manager/classes`
 /**
  * @description get_text2sql_database_manager_detail url链接，包含baseURL
  */
-text2sql_database_manager.get_text2sql_database_manager_detail.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.get_text2sql_database_manager_detail.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 /**
  * @description get_text2sql_database_manager_detail url链接，不包含baseURL
  */
-text2sql_database_manager.get_text2sql_database_manager_detail.path = `/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.get_text2sql_database_manager_detail.path = `${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 /**
  * @description update_text2sql_database_manager url链接，包含baseURL
  */
-text2sql_database_manager.update_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.update_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 /**
  * @description update_text2sql_database_manager url链接，不包含baseURL
  */
-text2sql_database_manager.update_text2sql_database_manager.path = `/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.update_text2sql_database_manager.path = `${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 /**
  * @description delete_text2sql_database_manager url链接，包含baseURL
  */
-text2sql_database_manager.delete_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.delete_text2sql_database_manager.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 /**
  * @description delete_text2sql_database_manager url链接，不包含baseURL
  */
-text2sql_database_manager.delete_text2sql_database_manager.path = `/api/v1/text2sql_database_manager/{mgr_id}`
+text2sql_database_manager.delete_text2sql_database_manager.path = `${dfApiPrefix}/text2sql_database_manager/{mgr_id}`
 
 export class preferences {
     /**
@@ -3185,7 +3185,7 @@ export class preferences {
             let responseType = 'json'
             let options = {
                 method: 'get',
-                url: '/api/v1/preferences/',
+                url: dfApiPrefix + '/preferences/',
                 data: {},
                 params: {},
                 headers: {
@@ -3242,7 +3242,7 @@ export class preferences {
             let responseType = 'json'
             let options = {
                 method: 'post',
-                url: '/api/v1/preferences/',
+                url: dfApiPrefix + '/preferences/',
                 data: object,
                 params: {},
                 headers: {
@@ -3287,19 +3287,19 @@ export class preferences {
 /**
  * @description get_preferences_api_v1_preferences__get url链接，包含baseURL
  */
-preferences.get_preferences_api_v1_preferences__get.fullPath = `${axios.defaults.baseURL}/api/v1/preferences/`
+preferences.get_preferences_api_v1_preferences__get.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/preferences/`
 /**
  * @description get_preferences_api_v1_preferences__get url链接，不包含baseURL
  */
-preferences.get_preferences_api_v1_preferences__get.path = `/api/v1/preferences/`
+preferences.get_preferences_api_v1_preferences__get.path = `${dfApiPrefix}/preferences/`
 /**
  * @description set_preferences_api_v1_preferences__post url链接，包含baseURL
  */
-preferences.set_preferences_api_v1_preferences__post.fullPath = `${axios.defaults.baseURL}/api/v1/preferences/`
+preferences.set_preferences_api_v1_preferences__post.fullPath = `${axios.defaults.baseURL}${dfApiPrefix}/preferences/`
 /**
  * @description set_preferences_api_v1_preferences__post url链接，不包含baseURL
  */
-preferences.set_preferences_api_v1_preferences__post.path = `/api/v1/preferences/`
+preferences.set_preferences_api_v1_preferences__post.path = `${dfApiPrefix}/preferences/`
 
 export class common {
     /**
