@@ -50,7 +50,7 @@ class AppContainer:
         self.text2sql_database_registry = Text2SQLDatabaseRegistry()
         self.text2sql_database_manager_registry = Text2SQLDatabaseManagerRegistry()
 
-        # Initialize builtin LLM serving
+        # Initialize Builtin_LLM serving
         from app.services.builtin_llm import init_builtin_llm_serving
         init_builtin_llm_serving(self.serving_registry)
 
