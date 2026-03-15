@@ -684,7 +684,131 @@ def dataflow_pipeline_execute(pipeline_config: Dict[str, Any], dataflow_runtime:
             "started_at": started_at,
             "completed_at": completed_at
         }
-    
+
+# Ray 远程执行函数（模块级别）
+@ray.remote
+def _execute_pipeline_remote(
+    pipeline_config: Dict[str, Any],
+    dataflow_runtime: Dict[str, Any],
+    task_id: str,
+    pipeline_registry_path: str,
+    pipeline_execution_path: str
+) -> Dict[str, Any]:
+    """
+    Ray 远程执行函数
+    在独立的 Ray worker 中执行 Pipeline
+
+    Args:
+        pipeline_config: Pipeline 配置
+        dataflow_runtime: Dataflow 运行时
+        task_id: 执行 ID
+        pipeline_registry_path: Pipeline 注册表路径
+        pipeline_execution_path: Pipeline 执行记录路径
+
+    Returns:
+        执行结果字典
+    """
+    # 立即添加路径到 sys.path
+    import sys
+    import os
+
+    # 添加 backend 目录到 sys.path
+    backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if backend_dir not in sys.path:
+        sys.path.insert(0, backend_dir)
+
+    # 写入文件确认 worker 启动
+    debug_file = f"/tmp/ray_worker_{task_id}.log"
+    with open(debug_file, "w") as f:
+        f.write(f"[RAY WORKER] Starting execution: {task_id}\n")
+        f.write(f"Worker PID: {os.getpid()}\n")
+        f.write(f"Backend dir: {backend_dir}\n")
+        f.write(f"sys.path: {sys.path[:5]}\n")
+
+    print(f"[RAY WORKER] Starting execution: {task_id}", flush=True)
+
+    # 现在可以安全导入 app 模块
+    from app.core.logger_setup import get_logger
+    logger = get_logger(__name__)
+    logger.info(f"[RAY WORKER] Starting execution: {task_id}")
+
+    try:
+        import json
+        from datetime import datetime
+        from app.core.config import settings
+        from app.services.dataflow_engine import DataFlowEngine
+        import importlib
+
+        for ext in settings._DATAFLOW_EXTENSIONS:
+            try:
+                importlib.import_module(ext)
+                print(f"[Ray Worker] Successfully loaded DataFlow extension: {ext}")
+            except ImportError as e:
+                print(f"[Ray Worker] Failed to load DataFlow extension '{ext}': {e}")
+
+        # 设置环境变量，标识这是 Ray worker
+        os.environ["RAY_WORKER"] = "1"
+
+        logger.info(f"[Ray Worker] Starting pipeline execution: {task_id}")
+
+        # 切换到正确的工作目录（与主进程一致）
+        correct_dir = settings.BASE_DIR
+        os.chdir(correct_dir)
+        logger.info(f"[Ray Worker] Changed working directory to: {os.getcwd()}")
+
+        logger.info(f"[Ray Worker] Current working directory: {os.getcwd()}")
+        logger.info(f"[Ray Worker] BASE_DIR: {settings.BASE_DIR}")
+        logger.info(f"[Ray Worker] CACHE_DIR: {settings.CACHE_DIR}")
+        logger.info(f"[Ray Worker] DATA_REGISTRY: {settings.DATA_REGISTRY}")
+        logger.info(f"[Ray Worker] DATAFLOW_CORE_DIR: {settings.DATAFLOW_CORE_DIR}")
+
+        # 更新状态为 running
+        try:
+            with open(pipeline_execution_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if task_id in data.get("tasks", {}):
+                data["tasks"][task_id]["status"] = "running"
+                data["tasks"][task_id]["started_at"] = datetime.now().isoformat()
+                with open(pipeline_execution_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"[Ray Worker] Failed to update execution status to running: {e}")
+
+        # 执行 Pipeline
+        result = dataflow_pipeline_execute(pipeline_config, dataflow_runtime, task_id, execution_path=pipeline_execution_path)
+
+        # 更新执行记录
+        try:
+            with open(pipeline_execution_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if task_id in data.get("tasks", {}):
+                data["tasks"][task_id].update(result)
+                with open(pipeline_execution_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"[Ray Worker] Failed to update execution result: {e}")
+
+        logger.info(f"[Ray Worker] Pipeline execution completed: {task_id}")
+        return result
+
+    except Exception as e:
+        import traceback
+        logger.error(f"[Ray Worker] Pipeline execution failed: {e}")
+        logger.error(traceback.format_exc())
+
+        # 返回失败结果
+        return {
+            "task_id": task_id,
+            "status": "failed",
+            "output": {
+                "error": str(e),
+                "traceback": traceback.format_exc()
+            },
+            "logs": [f"ERROR: {str(e)}"],
+            "started_at": datetime.now().isoformat(),
+            "completed_at": datetime.now().isoformat()
+        }
+
 class RayPipelineExecutor:
     """
     基于 Ray 的异步 Pipeline 执行器
@@ -707,148 +831,62 @@ class RayPipelineExecutor:
     def _ensure_initialized(self):
         """确保 Ray 已初始化"""
         if not self._initialized:
+            logger.info("=== Ray Initialization Check ===")
+            logger.info(f"Ray is_initialized: {ray.is_initialized()}")
+
             if not ray.is_initialized():
                 from app.core.config import settings
-                
-                # 获取项目根目录
                 project_root = settings.BASE_DIR
-                
-                # 简化 Ray 初始化配置
-                ray.init(
-                    num_cpus=self.max_concurrency,
-                    ignore_reinit_error=True,
-                    log_to_driver=True,
-                    logging_level="info"
-                )
-                logger.info("Ray initialized successfully")
-                logger.info(f"Ray cluster resources: {ray.cluster_resources()}")
-                logger.info(f"Ray working directory: {project_root}")
-            self._initialized = True
-    
-    @staticmethod
-    @ray.remote
-    def _execute_pipeline_remote(
-        pipeline_config: Dict[str, Any],
-        dataflow_runtime: Dict[str, Any],
-        task_id: str,
-        pipeline_registry_path: str,
-        pipeline_execution_path: str
-    ) -> Dict[str, Any]:
-        """
-        Ray 远程执行函数
-        在独立的 Ray worker 中执行 Pipeline
-        
-        Args:
-            pipeline_config: Pipeline 配置
-            dataflow_runtime: Dataflow 运行时
-            task_id: 执行 ID
-            pipeline_registry_path: Pipeline 注册表路径
-            pipeline_execution_path: Pipeline 执行记录路径
-        
-        Returns:
-            执行结果字典
-        """
-        # 立即输出日志，确认 Ray worker 启动
-        print(f"[RAY WORKER] Starting execution: {task_id}")
-        
-        try:
-            import json
-            import os
-            import importlib
-            from datetime import datetime
-            from app.core.logger_setup import get_logger
-            from app.core.config import settings
-            from app.services.dataflow_engine import DataFlowEngine
-            for ext in settings._DATAFLOW_EXTENSIONS:
+
+                logger.info(f"Starting Ray cluster with num_cpus={self.max_concurrency}")
                 try:
-                    importlib.import_module(ext)
-                    print(f"[Ray Worker] Successfully loaded DataFlow extension: {ext}")
-                except ImportError as e:
-                    print(f"[Ray Worker] Failed to load DataFlow extension '{ext}': {e}")
-            
-            # 设置环境变量，标识这是 Ray worker
-            os.environ["RAY_WORKER"] = "1"
-            
-            logger = get_logger(__name__)
-            logger.info(f"[Ray Worker] Starting pipeline execution: {task_id}")
-            
-            # 切换到正确的工作目录（与主进程一致）
-            correct_dir = settings.BASE_DIR
-            os.chdir(correct_dir)
-            logger.info(f"[Ray Worker] Changed working directory to: {os.getcwd()}")
-            
-            logger.info(f"[Ray Worker] Starting pipeline execution: {task_id}")
-            
-            logger.info(f"[Ray Worker] Current working directory: {os.getcwd()}")
-            logger.info(f"[Ray Worker] BASE_DIR: {settings.BASE_DIR}")
-            logger.info(f"[Ray Worker] CACHE_DIR: {settings.CACHE_DIR}")
-            logger.info(f"[Ray Worker] DATA_REGISTRY: {settings.DATA_REGISTRY}")
-            logger.info(f"[Ray Worker] DATAFLOW_CORE_DIR: {settings.DATAFLOW_CORE_DIR}")
-            logger.info(f"[Ray Worker] DATA_REGISTRY exists: {os.path.exists(settings.DATA_REGISTRY)}")
-            logger.info(f"[Ray Worker] DATAFLOW_CORE_DIR exists: {os.path.exists(settings.DATAFLOW_CORE_DIR)}")
-            logger.info(f"[Ray Worker] CACHE_DIR exists: {os.path.exists(settings.CACHE_DIR)}")
-            
-            # 列出当前目录下的文件
+                    # 设置运行环境，确保 worker 能访问项目模块
+                    from pathlib import Path
+                    import os
+
+                    # 确保 project_root 是 Path 对象
+                    if isinstance(project_root, str):
+                        project_root = Path(project_root)
+
+                    working_dir = str(project_root.parent)  # dcai-platform 目录
+
+                    ray.init(
+                        num_cpus=self.max_concurrency,
+                        ignore_reinit_error=True,
+                        log_to_driver=True,
+                        logging_level="info",
+                        runtime_env={
+                            "working_dir": working_dir,
+                            "py_modules": [str(project_root)],
+                            "env_vars": {
+                                "PYTHONPATH": str(project_root)
+                            }
+                        }
+                    )
+                    logger.info("✓ Ray initialized successfully")
+                except Exception as e:
+                    logger.error(f"✗ Ray initialization failed: {e}")
+                    raise
+
+            # 记录集群详细信息
             try:
-                logger.info(f"[Ray Worker] Files in current directory: {os.listdir('.')[:20]}")
-                if os.path.exists('data'):
-                    logger.info(f"[Ray Worker] Files in data directory: {os.listdir('data')[:20]}")
-                if os.path.exists(settings.CACHE_DIR):
-                    logger.info(f"[Ray Worker] Files in cache directory: {os.listdir(settings.CACHE_DIR)[:20]}")
-                else:
-                    logger.warning(f"[Ray Worker] Cache directory does not exist: {settings.CACHE_DIR}")
+                cluster_resources = ray.cluster_resources()
+                available_resources = ray.available_resources()
+                nodes = ray.nodes()
+
+                logger.info("=== Ray Cluster Status ===")
+                logger.info(f"Total resources: {cluster_resources}")
+                logger.info(f"Available resources: {available_resources}")
+                logger.info(f"Number of nodes: {len(nodes)}")
+                logger.info(f"Active tasks: {len(self._task_refs)}")
+
+                for i, node in enumerate(nodes):
+                    logger.info(f"Node {i}: alive={node['Alive']}, resources={node.get('Resources', {})}")
             except Exception as e:
-                logger.error(f"[Ray Worker] Failed to list files: {e}")
-                        
-            # 检查数据集是否加载成功
-            
-            # 更新状态为 running
-            try:
-                with open(pipeline_execution_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if task_id in data.get("tasks", {}):
-                    data["tasks"][task_id]["status"] = "running"
-                    data["tasks"][task_id]["started_at"] = datetime.now().isoformat()
-                    with open(pipeline_execution_path, "w", encoding="utf-8") as f:
-                        json.dump(data, f, indent=2)
-            except Exception as e:
-                logger.error(f"[Ray Worker] Failed to update execution status to running: {e}")
-                        
-            # 执行 Pipeline（传入 execution_path 以支持实时状态更新）
-            result = dataflow_pipeline_execute(pipeline_config, dataflow_runtime, task_id, execution_path=pipeline_execution_path)
-            
-            # 更新执行记录
-            try:
-                with open(pipeline_execution_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if task_id in data.get("tasks", {}):
-                    data["tasks"][task_id].update(result)
-                    with open(pipeline_execution_path, "w", encoding="utf-8") as f:
-                        json.dump(data, f, indent=2)
-            except Exception as e:
-                logger.error(f"[Ray Worker] Failed to update execution result: {e}")
-            
-            logger.info(f"[Ray Worker] Pipeline execution completed: {task_id}")
-            return result
-            
-        except Exception as e:
-            import traceback
-            logger.error(f"[Ray Worker] Pipeline execution failed: {e}")
-            logger.error(traceback.format_exc())
-            
-            # 返回失败结果
-            return {
-                "task_id": task_id,
-                "status": "failed",
-                "output": {
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
-                },
-                "logs": [f"ERROR: {str(e)}"],
-                "started_at": datetime.now().isoformat(),
-                "completed_at": datetime.now().isoformat()
-            }
-    
+                logger.warning(f"Failed to get cluster info: {e}")
+
+            self._initialized = True
+
     async def submit_execution(
         self,
         pipeline_config: Dict[str, Any],
@@ -870,36 +908,96 @@ class RayPipelineExecutor:
             task_id
         """
         self._ensure_initialized()
-        
-        logger.info(f"Submitting pipeline execution to Ray: {task_id}")
-        logger.info(f"Ray is initialized: {ray.is_initialized()}")
-        
+
+        logger.info("=== Submitting Ray Task ===")
+        logger.info(f"Task ID: {task_id}")
+        logger.info(f"Ray initialized: {ray.is_initialized()}")
+        logger.info(f"Current active tasks: {len(self._task_refs)}")
+
+        # 提交前检查资源
+        try:
+            cluster_res = ray.cluster_resources()
+            available_res = ray.available_resources()
+            logger.info(f"Cluster CPUs: {cluster_res.get('CPU', 0)}")
+            logger.info(f"Available CPUs: {available_res.get('CPU', 0)}")
+        except Exception as e:
+            logger.warning(f"Failed to check resources: {e}")
+
         # 提交远程任务
         try:
-            future = self._execute_pipeline_remote.remote(
+            logger.info(f"Calling _execute_pipeline_remote.remote() for task {task_id}")
+            future = _execute_pipeline_remote.remote(
                 pipeline_config,
                 dataflow_runtime,
                 task_id,
                 pipeline_registry_path,
                 pipeline_execution_path
             )
-            
+
             # 保存任务引用，用于后续kill操作
             self._task_refs[task_id] = future
-            
-            logger.info(f"Pipeline execution submitted: {task_id}, future: {future}")
-            logger.info(f"Ray cluster resources: {ray.cluster_resources()}")
-            logger.info(f"Ray available resources: {ray.available_resources()}")
-            
+
+            logger.info(f"✓ Task submitted successfully: {task_id}")
+            logger.info(f"Future object: {future}")
+            logger.info(f"Total active tasks: {len(self._task_refs)}")
+
+            # 检查任务是否真的在执行
+            try:
+                import time
+                time.sleep(0.5)  # 等待一下看任务是否开始
+                ready, not_ready = ray.wait([future], timeout=0)
+                logger.info(f"Task ready: {len(ready)}, not ready: {len(not_ready)}")
+
+                if ready:
+                    # 任务已经完成，尝试获取结果或错误
+                    try:
+                        result = ray.get(ready[0], timeout=0.1)
+                        logger.info(f"Task completed immediately with result: {type(result)}")
+                        logger.info(f"Result keys: {result.keys() if isinstance(result, dict) else 'N/A'}")
+                    except Exception as e:
+                        logger.error(f"Task failed immediately: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                elif not_ready:
+                    logger.warning(f"Task {task_id} is not executing yet after 0.5s")
+            except Exception as e:
+                logger.warning(f"Failed to check task status: {e}")
+
             # 异步接口，立即返回，不等待任务开始执行
             return task_id
-            
+
         except Exception as e:
-            logger.error(f"Failed to submit pipeline execution: {e}")
+            logger.error(f"✗ Failed to submit pipeline execution: {e}")
             import traceback
             logger.error(traceback.format_exc())
             raise
-    
+
+    def get_cluster_status(self) -> Dict[str, Any]:
+        """获取 Ray 集群状态信息"""
+        try:
+            if not ray.is_initialized():
+                return {
+                    "initialized": False,
+                    "error": "Ray not initialized"
+                }
+
+            cluster_resources = ray.cluster_resources()
+            available_resources = ray.available_resources()
+            nodes = ray.nodes()
+
+            return {
+                "initialized": True,
+                "cluster_resources": cluster_resources,
+                "available_resources": available_resources,
+                "nodes_count": len(nodes),
+                "active_tasks": len(self._task_refs),
+                "task_ids": list(self._task_refs.keys()),
+                "nodes": [{"alive": n["Alive"], "resources": n.get("Resources", {})} for n in nodes]
+            }
+        except Exception as e:
+            logger.error(f"Failed to get cluster status: {e}")
+            return {"initialized": ray.is_initialized(), "error": str(e)}
+
     async def get_execution_status(
         self,
         task_id: str,

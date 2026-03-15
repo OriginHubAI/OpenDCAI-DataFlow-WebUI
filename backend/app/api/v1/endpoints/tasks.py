@@ -341,3 +341,15 @@ async def kill_execution(request: Request, task_id: str):
         import traceback
         logger.error(traceback.format_exc())
         raise HTTPException(500, f"Failed to kill task: {str(e)}")
+
+
+@router.get("/ray/cluster-status", response_model=ApiResponse[Dict], operation_id="get_ray_cluster_status", summary="获取Ray集群状态")
+async def get_ray_cluster_status():
+    """获取 Ray 集群状态信息，包括资源、节点、任务数量等"""
+    try:
+        from app.services.ray_pipeline_executor import ray_executor
+        status = ray_executor.get_cluster_status()
+        return ok(status)
+    except Exception as e:
+        logger.error(f"Failed to get Ray cluster status: {e}")
+        raise HTTPException(500, f"Failed to get cluster status: {str(e)}")
