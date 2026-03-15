@@ -40,8 +40,20 @@ class VisualizeDatasetService:
         read_func = self.pandas_read_func_map.get(file_type, None)
         if not read_func:
             raise ValueError(f"No read function found for type: {file_type}")
-        
+
         df: pd.DataFrame = read_func(file_path)
+
+        # Flatten nested JSON columns for better visualization
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                # Check if column contains dict/nested structures
+                sample = df[col].iloc[0] if len(df) > 0 else None
+                if isinstance(sample, dict):
+                    # Flatten nested dict into separate columns
+                    nested_df = pd.json_normalize(df[col])
+                    nested_df.columns = [f"{col}.{subcol}" for subcol in nested_df.columns]
+                    df = pd.concat([df.drop(columns=[col]), nested_df], axis=1)
+
         return df.iloc[start:end].to_json(orient="records")
     
     def list_supported_file_types(self):
