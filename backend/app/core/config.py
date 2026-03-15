@@ -2,9 +2,11 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_ROOT_DIR = os.path.dirname(os.path.dirname(_BASE_DIR))
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
+        env_file=os.path.join(_ROOT_DIR, '.env'),
         env_file_encoding='utf-8',
         extra='ignore'
     )
@@ -62,5 +64,12 @@ class Settings(BaseSettings):
     _DATAFLOW_EXTENSIONS = [
         # "my_dataflow_extension"
     ]
+
+    # LLM Configuration from .env
+    LLM_PROVIDER_BASE_URL: str = ""
+    LLM_PROVIDER_API_KEY: str = ""
+    LLM_DEFAULT_MODEL: str = "gpt-4o"
+    LLM_AVAILABLE_MODELS: str = "gpt-4o"
+    LLM_REQUEST_TIMEOUT: int = 120
 
 settings = Settings()
